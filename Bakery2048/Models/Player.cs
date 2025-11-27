@@ -1,7 +1,7 @@
 public class Player
 {
     public Guid PlayerId { get; set; }
-    public required string Name { get; set; }
+    public string Name { get; set; }
     public string Email { get; set; }
     public int HighestScore { get; set; }
     public int CurrentScore { get; set; }
@@ -194,4 +194,50 @@ public class Player
     {
         CurrentScore = 0;
     }
+
+    // Record a complete game session
+    public void RecordGameSession(int finalScore, int bestTileAchieved, int movesMade, TimeSpan playDuration, bool reachedWinCondition = false)
+    {
+        // Update scores
+        CurrentScore = finalScore;
+        if (finalScore > HighestScore)
+        {
+            HighestScore = finalScore;
+        }
+
+        // Update best tile
+        if (bestTileAchieved > BestTileAchieved)
+        {
+            BestTileAchieved = bestTileAchieved;
+        }
+
+        // Increment games played
+        GamesPlayed++;
+
+        // Update last played timestamp
+        LastPlayed = DateTime.Now;
+
+        // Add moves to total
+        TotalMoves += movesMade;
+
+        // Add play time
+        TotalPlayTime += playDuration;
+
+        // Recalculate average score
+        CalculateAverageScore();
+
+        // Update win streak
+        if (reachedWinCondition)
+        {
+            IncrementWinStreak();
+        }
+        else
+        {
+            ResetWinStreak();
+        }
+
+        // Auto level up based on score
+        CalculateLevelFromScore();
+    }
 }
+
