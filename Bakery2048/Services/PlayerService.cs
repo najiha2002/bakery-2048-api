@@ -76,18 +76,21 @@ public class PlayerService
             string status = player.IsActive ? "Active" : "Inactive";
             Console.WriteLine($"{player.Username,-20} {player.Level,-8} {player.HighestScore,-12} {player.GamesPlayed,-15} {status,-10}");
         }
+
+        Console.Write("\nPress Enter to continue...");
+        Console.ReadLine();
     }
 
     public void SearchPlayer()
     {
-        Console.Write("\nEnter player name to search: ");
+        Console.Write("\nEnter player username to search: ");
         string searchName = Console.ReadLine() ?? "";
 
         var foundPlayers = players.Where(p => p.Username.Contains(searchName, StringComparison.OrdinalIgnoreCase)).ToList();
 
         if (foundPlayers.Count == 0)
         {
-            Console.WriteLine($"No players found with name containing '{searchName}'.");
+            Console.WriteLine($"No players found with username containing '{searchName}'.");
             return;
         }
 
@@ -98,11 +101,14 @@ public class PlayerService
             Console.WriteLine($"Rank: {player.GetRankCategory()}");
             Console.WriteLine(new string('-', 50));
         }
+
+        Console.Write("\nPress Enter to continue...");
+        Console.ReadLine();
     }
 
     public void UpdatePlayer()
     {
-        Console.Write("\nEnter player name to update: ");
+        Console.Write("\nEnter player username to update: ");
         string searchName = Console.ReadLine() ?? "";
 
         var player = players.FirstOrDefault(p => p.Username.Equals(searchName, StringComparison.OrdinalIgnoreCase));
@@ -189,11 +195,14 @@ public class PlayerService
         }
 
         SaveToFile();
+        
+        Console.Write("\nPress Enter to continue...");
+        Console.ReadLine();
     }
 
     public void DeletePlayer()
     {
-        Console.Write("\nEnter player name to delete: ");
+        Console.Write("\nEnter player username to delete: ");
         string searchName = Console.ReadLine() ?? "";
 
         var player = players.FirstOrDefault(p => p.Username.Equals(searchName, StringComparison.OrdinalIgnoreCase));
@@ -217,6 +226,9 @@ public class PlayerService
         {
             Console.WriteLine("Deletion cancelled.");
         }
+
+        Console.Write("\nPress Enter to continue...");
+        Console.ReadLine();
     }
 
     public void ViewPlayerStatistics()
@@ -251,6 +263,9 @@ public class PlayerService
             Console.WriteLine($"{rank}. {player.GetLeaderboardEntry()} - {player.GetRankCategory()}");
             rank++;
         }
+
+        Console.Write("\nPress Enter to continue...");
+        Console.ReadLine();
     }
 
     public void ShowMenu()
@@ -262,7 +277,7 @@ public class PlayerService
             Console.WriteLine("\n=== Player Management ===");
             Console.WriteLine("1. Register New Player");
             Console.WriteLine("2. View All Players");
-            Console.WriteLine("3. Search Player by Name");
+            Console.WriteLine("3. Search Player by Username");
             Console.WriteLine("4. Update Player Info");
             Console.WriteLine("5. Delete Player");
             Console.WriteLine("6. View Player Statistics");
@@ -307,10 +322,10 @@ public class PlayerService
 
     public void RecordGameSession(Player? player = null)
     {
-        // get player by name if not provided
+        // get player by username if not provided
         if (player == null)
         {
-            Console.Write("\nEnter player name: ");
+            Console.Write("\nEnter player username: ");
             string searchName = Console.ReadLine() ?? "";
 
             player = players.FirstOrDefault(p => p.Username.Equals(searchName, StringComparison.OrdinalIgnoreCase));
@@ -356,19 +371,19 @@ public class PlayerService
             return;
         }
 
-        // Get power-ups used with codes
+        // Get power-ups used with names
         List<string> powerUpsUsedInSession = new List<string>();
         Console.Write("Enter number of power-ups used (0 if none): ");
         if (int.TryParse(Console.ReadLine(), out int powerUpCount) && powerUpCount > 0)
         {
-            Console.WriteLine("\nEnter the code of each power-up used (e.g., SB, EM, TF, BM):");
+            Console.WriteLine("\nEnter the name of each power-up used:");
             for (int i = 1; i <= powerUpCount; i++)
             {
-                Console.Write($"Power-up #{i} code: ");
-                string? powerUpCode = Console.ReadLine();
-                if (!string.IsNullOrWhiteSpace(powerUpCode))
+                Console.Write($"Power-up #{i}: ");
+                string? powerUpName = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(powerUpName))
                 {
-                    powerUpsUsedInSession.Add(powerUpCode.Trim().ToUpper());
+                    powerUpsUsedInSession.Add(powerUpName.Trim());
                 }
             }
         }
@@ -391,6 +406,9 @@ public class PlayerService
         Console.WriteLine($"Rank: {player.GetRankCategory()}");
         Console.WriteLine($"Win Streak: {player.WinStreak}");
         Console.WriteLine($"Total Power-Ups Used: {player.PowerUpsUsed}");
+        
+        Console.Write("\nPress Enter to continue...");
+        Console.ReadLine();
     }
 
     private void SaveToFile()
