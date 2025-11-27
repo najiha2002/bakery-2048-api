@@ -4,8 +4,11 @@
     static List<Tile> tiles = new List<Tile>();
     static List<PowerUp> powerUps = new List<PowerUp>();
 
+    static PlayerService playerService = null!;
+
     static void Main(string[] args)
     {
+        playerService = new PlayerService(players);
         bool exit = false;
 
         Console.WriteLine("=== Welcome to 2048 Data Management System ===");
@@ -53,7 +56,7 @@
 
     static void ManagePlayers()
     {
-        Console.WriteLine("Player management menu (CRUD functions to be added)");
+        playerService.ShowMenu();
     }
 
     static void ManageTiles()
