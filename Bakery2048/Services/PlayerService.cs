@@ -53,7 +53,8 @@ public class PlayerService
 
         string? recordNow = Console.ReadLine()?.ToLower();
         if (recordNow == "yes" || recordNow == "y")
-        {            RecordGameSession();
+        {
+            RecordGameSession(newPlayer);
         }
     }
 
@@ -304,18 +305,21 @@ public class PlayerService
         }
     }
 
-    public void RecordGameSession()
+    public void RecordGameSession(Player? player = null)
     {
-        // get player by name
-        Console.Write("\nEnter player name: ");
-        string searchName = Console.ReadLine() ?? "";
-
-        var player = players.FirstOrDefault(p => p.Username.Equals(searchName, StringComparison.OrdinalIgnoreCase));
-
+        // get player by name if not provided
         if (player == null)
         {
-            Console.WriteLine($"Player '{searchName}' not found.");
-            return;
+            Console.Write("\nEnter player name: ");
+            string searchName = Console.ReadLine() ?? "";
+
+            player = players.FirstOrDefault(p => p.Username.Equals(searchName, StringComparison.OrdinalIgnoreCase));
+
+            if (player == null)
+            {
+                Console.WriteLine($"Player '{searchName}' not found.");
+                return;
+            }
         }
 
         Console.WriteLine($"\n=== Recording Game Session for {player.Username} ===");
