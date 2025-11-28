@@ -132,9 +132,9 @@ namespace Bakery2048.Utilities
         public static void ShowTitle(string title)
         {
             Console.Clear();
-            WriteLineColored("╔════════════════════════════════════════════════╗", ConsoleColor.Cyan);
+            WriteLineColored("╔══════════════════════════════════════════════╗", ConsoleColor.Cyan);
             WriteLineColored($"║  {title.PadRight(44)}║", ConsoleColor.Cyan);
-            WriteLineColored("╚════════════════════════════════════════════════╝", ConsoleColor.Cyan);
+            WriteLineColored("╚══════════════════════════════════════════════╝", ConsoleColor.Cyan);
             Console.WriteLine();
         }
 
