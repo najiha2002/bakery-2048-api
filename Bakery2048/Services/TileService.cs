@@ -85,10 +85,10 @@ public class TileService : BaseService<Tile>
             return;
         }
 
-        // Check for duplicate tile value
-        if (items.Any(t => t.TileValue == tileValue))
+        // Check for duplicate tile value (only among active tiles)
+        if (items.Any(t => t.IsActive && t.TileValue == tileValue))
         {
-            ConsoleUI.Warning($"A tile with value {tileValue} already exists.");
+            ConsoleUI.Warning($"A tile with value {tileValue} already exists and is active.");
             PauseForUser();
             return;
         }
@@ -247,79 +247,86 @@ public class TileService : BaseService<Tile>
 
         string? choice = ConsoleUI.Prompt("Select field to update");
 
-        switch (choice)
+        try
         {
-            case "1":
-                string? newName = ConsoleUI.Prompt("Enter new item name");
-                if (!string.IsNullOrWhiteSpace(newName))
-                {
-                    tile.ItemName = newName;
+            switch (choice)
+            {
+                case "1":
+                    string? newName = ConsoleUI.Prompt("Enter new item name");
+                    if (!string.IsNullOrWhiteSpace(newName))
+                    {
+                        tile.ItemName = newName;
+                        tile.UpdateModifiedDate();
+                        SaveToFile();
+                        ConsoleUI.Success("Item name updated successfully!");
+                    }
+                    break;
+
+                case "2":
+                    Console.Write("Enter new tile value: ");
+                    if (int.TryParse(Console.ReadLine(), out int newValue) && newValue > 0)
+                    {
+                        tile.TileValue = newValue;
+                        tile.UpdateModifiedDate();
+                        SaveToFile();
+                        ConsoleUI.Success("Tile value updated successfully!");
+                    }
+                    else
+                    {
+                        ConsoleUI.Error("Invalid tile value.");
+                    }
+                    break;
+
+                case "3":
+                    string? newIcon = ConsoleUI.Prompt("Enter new icon/emoji");
+                    if (!string.IsNullOrWhiteSpace(newIcon))
+                    {
+                        tile.Icon = newIcon;
+                        tile.UpdateModifiedDate();
+                        SaveToFile();
+                        ConsoleUI.Success("Icon updated successfully!");
+                    }
+                    break;
+
+                case "4":
+                    string? newColor = ConsoleUI.Prompt("Enter new color hex code");
+                    if (!string.IsNullOrWhiteSpace(newColor))
+                    {
+                        tile.Color = newColor;
+                        tile.UpdateModifiedDate();
+                        SaveToFile();
+                        ConsoleUI.Success("Color updated successfully!");
+                    }
+                    break;
+
+                case "5":
+                    tile.IsSpecialItem = !tile.IsSpecialItem;
                     tile.UpdateModifiedDate();
                     SaveToFile();
-                    ConsoleUI.Success("Item name updated successfully!");
-                }
-                break;
+                    ConsoleUI.Success($"Special item status: {(tile.IsSpecialItem ? "Yes" : "No")}");
+                    break;
 
-            case "2":
-                Console.Write("Enter new tile value: ");
-                if (int.TryParse(Console.ReadLine(), out int newValue) && newValue > 0)
-                {
-                    tile.TileValue = newValue;
-                    tile.UpdateModifiedDate();
+                case "6":
+                    if (tile.IsActive)
+                        tile.Deactivate();
+                    else
+                        tile.Activate();
                     SaveToFile();
-                    ConsoleUI.Success("Tile value updated successfully!");
-                }
-                else
-                {
-                    ConsoleUI.Error("Invalid tile value.");
-                }
-                break;
+                    ConsoleUI.Success($"Tile is now {(tile.IsActive ? "Active" : "Inactive")}");
+                    break;
 
-            case "3":
-                string? newIcon = ConsoleUI.Prompt("Enter new icon/emoji");
-                if (!string.IsNullOrWhiteSpace(newIcon))
-                {
-                    tile.Icon = newIcon;
-                    tile.UpdateModifiedDate();
-                    SaveToFile();
-                    ConsoleUI.Success("Icon updated successfully!");
-                }
-                break;
+                case "0":
+                    ConsoleUI.Info("Update cancelled.");
+                    break;
 
-            case "4":
-                string? newColor = ConsoleUI.Prompt("Enter new color hex code");
-                if (!string.IsNullOrWhiteSpace(newColor))
-                {
-                    tile.Color = newColor;
-                    tile.UpdateModifiedDate();
-                    SaveToFile();
-                    ConsoleUI.Success("Color updated successfully!");
-                }
-                break;
-
-            case "5":
-                tile.IsSpecialItem = !tile.IsSpecialItem;
-                tile.UpdateModifiedDate();
-                SaveToFile();
-                ConsoleUI.Success($"Special item status: {(tile.IsSpecialItem ? "Yes" : "No")}");
-                break;
-
-            case "6":
-                if (tile.IsActive)
-                    tile.Deactivate();
-                else
-                    tile.Activate();
-                SaveToFile();
-                ConsoleUI.Success($"Tile is now {(tile.IsActive ? "Active" : "Inactive")}");
-                break;
-
-            case "0":
-                ConsoleUI.Info("Update cancelled.");
-                break;
-
-            default:
-                ConsoleUI.Error("Invalid choice.");
-                break;
+                default:
+                    ConsoleUI.Error("Invalid choice.");
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            ConsoleUI.Error($"An error occurred while updating the tile: {ex.Message}");
         }
 
         PauseForUser();
