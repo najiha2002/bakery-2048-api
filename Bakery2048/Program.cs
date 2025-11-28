@@ -16,19 +16,19 @@ class Program
         tileService = new TileService(tiles);
         bool exit = false;
 
-        ConsoleUI.ShowTitle("🍰 Bakery 2048 - Data Management System 🍰");
-
         while (!exit)
         {
-            ConsoleUI.SimpleHeader("Main Menu");
+            Console.Clear();
+            ConsoleUI.ShowTitle("🍰 Bakery 2048 - Data Management System 🍰");
             ConsoleUI.MenuOption("1", "Manage Players");
             ConsoleUI.MenuOption("2", "Manage Tiles");
             ConsoleUI.MenuOption("3", "Manage Power-Ups");
             ConsoleUI.MenuOption("4", "Generate Random Data");
             ConsoleUI.MenuOption("5", "Run Data Analysis (LINQ)");
             ConsoleUI.MenuOption("6", "Exit");
+            Console.WriteLine();
             
-            string? input = ConsoleUI.Prompt("\nSelect an option (1-6)", ConsoleColor.Yellow);
+            string? input = ConsoleUI.Prompt("Select an option (1-6)", ConsoleColor.Yellow);
 
             switch (input)
             {
