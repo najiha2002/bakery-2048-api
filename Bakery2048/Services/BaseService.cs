@@ -20,7 +20,8 @@ namespace Bakery2048.Services
             {
                 var options = new JsonSerializerOptions
                 {
-                    WriteIndented = true
+                    WriteIndented = true,
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
                 };
 
                 string jsonString = JsonSerializer.Serialize(items, options);
@@ -39,19 +40,41 @@ namespace Bakery2048.Services
                 if (File.Exists(dataFilePath))
                 {
                     string jsonString = File.ReadAllText(dataFilePath);
-                    var loadedItems = JsonSerializer.Deserialize<List<T>>(jsonString);
+                    
+                    // Debug: Check if file is empty
+                    if (string.IsNullOrWhiteSpace(jsonString) || jsonString.Trim() == "[]")
+                    {
+                        Console.WriteLine($"⚠ Warning: {dataFilePath} is empty or has no data.");
+                        return;
+                    }
+                    
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    };
+                    
+                    var loadedItems = JsonSerializer.Deserialize<List<T>>(jsonString, options);
 
-                    if (loadedItems != null)
+                    if (loadedItems != null && loadedItems.Count > 0)
                     {
                         items.Clear();
                         items.AddRange(loadedItems);
-                        Console.WriteLine($"✓ Loaded {items.Count} {typeof(T).Name.ToLower()}(s) from file.");
+                        Console.WriteLine($"✓ Loaded {items.Count} {typeof(T).Name.ToLower()}(s) from {dataFilePath}.");
                     }
+                    else
+                    {
+                        Console.WriteLine($"⚠ Deserialization returned null or empty for {dataFilePath}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"ℹ File not found: {dataFilePath} - starting with empty list.");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading data: {ex.Message}");
+                Console.WriteLine($"❌ Error loading data from {dataFilePath}: {ex.Message}");
+                Console.WriteLine($"   Details: {ex.InnerException?.Message}");
             }
         }
 
