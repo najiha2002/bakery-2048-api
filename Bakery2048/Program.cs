@@ -9,11 +9,13 @@ class Program
 
     static PlayerService playerService = null!;
     static TileService tileService = null!;
+    static PowerUpService powerUpService = null!;
 
     static void Main(string[] args)
     {
         playerService = new PlayerService(players);
         tileService = new TileService(tiles);
+        powerUpService = new PowerUpService(powerUps);
         bool exit = false;
 
         while (!exit)
@@ -70,8 +72,7 @@ class Program
 
     static void ManagePowerUps()
     {
-        ConsoleUI.Info("Power-Up management menu (CRUD functions to be added)");
-        ConsoleUI.PauseForUser();
+        powerUpService.ShowMenu();
     }
 
     static void GenerateRandomData()
