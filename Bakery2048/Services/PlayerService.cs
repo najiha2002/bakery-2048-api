@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Bakery2048.Services;
+using Bakery2048.Utilities;
 
 public class PlayerService : BaseService<Player>
 {
@@ -9,30 +10,28 @@ public class PlayerService : BaseService<Player>
 
     public void RegisterPlayer()
     {
-        Console.WriteLine("\n=== Player Registration ===");
+        ConsoleUI.SimpleHeader("Player Registration");
         
-        Console.Write("Enter your name: ");
-        string name = Console.ReadLine() ?? "";
+        string name = ConsoleUI.Prompt("Enter your name", ConsoleColor.Cyan);
 
         if (string.IsNullOrWhiteSpace(name))
         {
-            Console.WriteLine("Name cannot be empty.");
+            ConsoleUI.Error("Name cannot be empty.");
             return;
         }
 
         // Check if player already exists
         if (items.Any(p => p.Username.Equals(name, StringComparison.OrdinalIgnoreCase)))
         {
-            Console.WriteLine($"Player '{name}' already registered.");
+            ConsoleUI.Warning($"Player '{name}' already registered.");
             return;
         }
 
-        Console.Write("Enter your email: ");
-        string email = Console.ReadLine() ?? "";
+        string email = ConsoleUI.Prompt("Enter your email", ConsoleColor.Cyan);
 
         if (string.IsNullOrWhiteSpace(email))
         {
-            Console.WriteLine("Email cannot be empty.");
+            ConsoleUI.Error("Email cannot be empty.");
             return;
         }
 
@@ -41,14 +40,14 @@ public class PlayerService : BaseService<Player>
 
         SaveToFile();
 
-        Console.WriteLine($"\n✓ Welcome to Bakery 2048, {name}!");
-        Console.WriteLine($"Player ID: {newPlayer.PlayerId}");
-        Console.WriteLine($"Registration Date: {newPlayer.DateRegistered:yyyy-MM-dd HH:mm}");
-        Console.WriteLine($"Starting Rank: {newPlayer.GetRankCategory()}");
-        Console.WriteLine("\nYou can now start playing and recording game sessions! Do you want to record a game session now? (yes/no): ");
-
-        string? recordNow = Console.ReadLine()?.ToLower();
-        if (recordNow == "yes" || recordNow == "y")
+        Console.WriteLine();
+        ConsoleUI.Success($"Welcome to Bakery 2048, {name}!");
+        ConsoleUI.KeyValue("Player ID", newPlayer.PlayerId.ToString(), ConsoleColor.DarkGray);
+        ConsoleUI.KeyValue("Registration Date", newPlayer.DateRegistered.ToString("yyyy-MM-dd HH:mm"), ConsoleColor.DarkGray);
+        ConsoleUI.KeyValue("Starting Rank", newPlayer.GetRankCategory(), ConsoleColor.Yellow);
+        
+        Console.WriteLine();
+        if (ConsoleUI.Confirm("Do you want to record a game session now?"))
         {
             RecordGameSession(newPlayer);
         }
@@ -56,24 +55,37 @@ public class PlayerService : BaseService<Player>
 
     public void ViewAllPlayers()
     {
-        Console.WriteLine("\n=== All Players ===");
+        ConsoleUI.SimpleHeader("All Players");
 
         if (items.Count == 0)
         {
-            Console.WriteLine("No players found.");
+            ConsoleUI.Warning("No players found.");
             return;
         }
 
-        Console.WriteLine($"{"Username",-20} {"Level",-8} {"High Score",-12} {"Games Played",-15} {"Status",-10}");
-        Console.WriteLine(new string('-', 75));
+        // Header row
+        string[] headers = { "Username", "Level", "High Score", "Games Played", "Status" };
+        int[] widths = { 20, 8, 12, 15, 10 };
+        ConsoleUI.TableRow(headers, widths, true);
+        ConsoleUI.Divider('─', 75);
 
         foreach (var player in items)
         {
             string status = player.IsActive ? "Active" : "Inactive";
-            Console.WriteLine($"{player.Username,-20} {player.Level,-8} {player.HighestScore,-12} {player.GamesPlayed,-15} {status,-10}");
+            string[] row = { 
+                player.Username, 
+                player.Level.ToString(), 
+                player.HighestScore.ToString(), 
+                player.GamesPlayed.ToString(), 
+                status 
+            };
+            
+            // Color code status
+            Console.Write($"{row[0],-20} {row[1],-8} {row[2],-12} {row[3],-15} ");
+            ConsoleUI.WriteLineColored(row[4], player.IsActive ? ConsoleColor.Green : ConsoleColor.DarkGray);
         }
 
-        PauseForUser();
+        ConsoleUI.PauseForUser();
     }
 
     public void SearchPlayer()
@@ -227,36 +239,42 @@ public class PlayerService : BaseService<Player>
     {
         if (items.Count == 0)
         {
-            Console.WriteLine("\nNo players available for statistics.");
+            ConsoleUI.Warning("No players available for statistics.");
             return;
         }
 
-        Console.WriteLine("\n=== Player Statistics ===");
-        Console.WriteLine($"Total Players: {items.Count}");
-        Console.WriteLine($"Active Players: {items.Count(p => p.IsActive)}");
-        Console.WriteLine($"Inactive Players: {items.Count(p => !p.IsActive)}");
-        Console.WriteLine($"Average Score: {items.Average(p => p.HighestScore):F2}");
-        Console.WriteLine($"Highest Score: {items.Max(p => p.HighestScore)}");
-        Console.WriteLine($"Total Games Played: {items.Sum(p => p.GamesPlayed)}");
+        ConsoleUI.SimpleHeader("Player Statistics");
+
+        // Basic stats
+        ConsoleUI.KeyValue("Total Players", items.Count.ToString(), ConsoleColor.Cyan);
+        ConsoleUI.KeyValue("Active Players", items.Count(p => p.IsActive).ToString(), ConsoleColor.Green);
+        ConsoleUI.KeyValue("Inactive Players", items.Count(p => !p.IsActive).ToString(), ConsoleColor.DarkGray);
+        ConsoleUI.KeyValue("Average Score", items.Average(p => p.HighestScore).ToString("F2"), ConsoleColor.Yellow);
+        ConsoleUI.KeyValue("Highest Score", items.Max(p => p.HighestScore).ToString(), ConsoleColor.Magenta);
+        ConsoleUI.KeyValue("Total Games Played", items.Sum(p => p.GamesPlayed).ToString(), ConsoleColor.Blue);
 
         var topPlayer = items.OrderByDescending(p => p.HighestScore).FirstOrDefault();
         if (topPlayer != null)
         {
-            Console.WriteLine($"\n🏆 Top Player: {topPlayer.Username}");
-            Console.WriteLine($"   Score: {topPlayer.HighestScore}");
-            Console.WriteLine($"   Rank: {topPlayer.GetRankCategory()}");
+            Console.WriteLine();
+            ConsoleUI.WriteLineColored("🏆 Top Player", ConsoleColor.Yellow);
+            ConsoleUI.KeyValue("   Username", topPlayer.Username, ConsoleColor.White);
+            ConsoleUI.KeyValue("   Score", topPlayer.HighestScore.ToString(), ConsoleColor.Magenta);
+            ConsoleUI.KeyValue("   Rank", topPlayer.GetRankCategory(), ConsoleColor.Yellow);
         }
 
-        Console.WriteLine("\n=== Top 5 Leaderboard ===");
+        Console.WriteLine();
+        ConsoleUI.WriteLineColored("═══ Top 5 Leaderboard ═══", ConsoleColor.Cyan);
         var top5 = items.OrderByDescending(p => p.HighestScore).Take(5);
         int rank = 1;
         foreach (var player in top5)
         {
-            Console.WriteLine($"{rank}. {player.GetLeaderboardEntry()} - {player.GetRankCategory()}");
+            ConsoleUI.WriteColored($"{rank}. ", ConsoleColor.Yellow);
+            Console.WriteLine($"{player.GetLeaderboardEntry()} - {player.GetRankCategory()}");
             rank++;
         }
 
-        PauseForUser();
+        ConsoleUI.PauseForUser();
     }
 
     public override void ShowMenu()
@@ -265,18 +283,17 @@ public class PlayerService : BaseService<Player>
 
         while (!back)
         {
-            Console.WriteLine("\n=== Player Management ===");
-            Console.WriteLine("1. Register New Player");
-            Console.WriteLine("2. View All Players");
-            Console.WriteLine("3. Search Player by Username");
-            Console.WriteLine("4. Update Player Info");
-            Console.WriteLine("5. Delete Player");
-            Console.WriteLine("6. View Player Statistics");
-            Console.WriteLine("7. Record New Game Session");
-            Console.WriteLine("8. Back to Main Menu");
-            Console.Write("Select an option (1-8): ");
-
-            string? input = Console.ReadLine();
+            ConsoleUI.SimpleHeader("Player Management");
+            ConsoleUI.MenuOption("1", "Register New Player");
+            ConsoleUI.MenuOption("2", "View All Players");
+            ConsoleUI.MenuOption("3", "Search Player by Username");
+            ConsoleUI.MenuOption("4", "Update Player Info");
+            ConsoleUI.MenuOption("5", "Delete Player");
+            ConsoleUI.MenuOption("6", "View Player Statistics");
+            ConsoleUI.MenuOption("7", "Record New Game Session");
+            ConsoleUI.MenuOption("8", "Back to Main Menu");
+            
+            string? input = ConsoleUI.Prompt("\nSelect an option (1-8)", ConsoleColor.Yellow);
 
             switch (input)
             {
