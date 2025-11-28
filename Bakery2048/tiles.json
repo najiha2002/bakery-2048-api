@@ -1,6 +1,6 @@
 [
   {
-    "Id": "0001",
+    "Id": "00000000-0000-0000-0000-000000000001",
     "ItemName": "Flour",
     "TileValue": 2,
     "Icon": "🌾",
@@ -11,7 +11,7 @@
     "IsActive": true
   },
   {
-    "Id": "0002",
+    "Id": "00000000-0000-0000-0000-000000000002",
     "ItemName": "Egg",
     "TileValue": 4,
     "Icon": "🥚",
@@ -22,7 +22,7 @@
     "IsActive": true
   },
   {
-    "Id": "0003",
+    "Id": "00000000-0000-0000-0000-000000000003",
     "ItemName": "Butter",
     "TileValue": 8,
     "Icon": "🧈",
@@ -33,7 +33,7 @@
     "IsActive": true
   },
   {
-    "Id": "0004",
+    "Id": "00000000-0000-0000-0000-000000000004",
     "ItemName": "Sugar",
     "TileValue": 16,
     "Icon": "🍬",
@@ -44,7 +44,7 @@
     "IsActive": true
   },
   {
-    "Id": "0005",
+    "Id": "00000000-0000-0000-0000-000000000005",
     "ItemName": "Donut",
     "TileValue": 32,
     "Icon": "🍩",
@@ -55,7 +55,7 @@
     "IsActive": true
   },
   {
-    "Id": "0006",
+    "Id": "00000000-0000-0000-0000-000000000006",
     "ItemName": "Cookie",
     "TileValue": 64,
     "Icon": "🍪",
@@ -66,7 +66,7 @@
     "IsActive": true
   },
   {
-    "Id": "0007",
+    "Id": "00000000-0000-0000-0000-000000000007",
     "ItemName": "Cupcake",
     "TileValue": 128,
     "Icon": "🧁",
@@ -77,7 +77,7 @@
     "IsActive": true
   },
   {
-    "Id": "0008",
+    "Id": "00000000-0000-0000-0000-000000000008",
     "ItemName": "Slice Cake",
     "TileValue": 256,
     "Icon": "🍰",
@@ -88,7 +88,7 @@
     "IsActive": true
   },
   {
-    "Id": "0009",
+    "Id": "00000000-0000-0000-0000-000000000009",
     "ItemName": "Whole Cake",
     "TileValue": 512,
     "Icon": "🎂",
