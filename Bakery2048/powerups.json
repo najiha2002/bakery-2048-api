@@ -1,6 +1,5 @@
 [
   {
-    "Id": "00000000-0000-0000-0000-000000000001",
     "PowerUpName": "Double Score",
     "PowerUpType": 0,
     "Description": "Double all points earned for 10 moves",
@@ -8,15 +7,15 @@
     "Cost": 200,
     "Cooldown": 5,
     "IsUnlocked": true,
-    "UsageCount": 30,
+    "UsageCount": 326,
     "EffectMultiplier": 2,
     "IconUrl": "⚡",
+    "Id": "00000000-0000-0000-0000-000000000001",
     "DateCreated": "2025-11-28T00:00:00",
     "DateModified": "2025-11-28T00:00:00",
     "IsActive": true
   },
   {
-    "Id": "00000000-0000-0000-0000-000000000002",
     "PowerUpName": "Time Freeze",
     "PowerUpType": 1,
     "Description": "Extend gameplay time by 30 seconds",
@@ -24,15 +23,15 @@
     "Cost": 300,
     "Cooldown": 10,
     "IsUnlocked": true,
-    "UsageCount": 39,
+    "UsageCount": 343,
     "EffectMultiplier": 1,
     "IconUrl": "⏰",
+    "Id": "00000000-0000-0000-0000-000000000002",
     "DateCreated": "2025-11-28T00:00:00",
     "DateModified": "2025-11-28T00:00:00",
     "IsActive": true
   },
   {
-    "Id": "00000000-0000-0000-0000-000000000003",
     "PowerUpName": "Undo Move",
     "PowerUpType": 2,
     "Description": "Undo the last 3 moves",
@@ -40,15 +39,15 @@
     "Cost": 150,
     "Cooldown": 8,
     "IsUnlocked": true,
-    "UsageCount": 38,
+    "UsageCount": 365,
     "EffectMultiplier": 1,
     "IconUrl": "↶",
+    "Id": "00000000-0000-0000-0000-000000000003",
     "DateCreated": "2025-11-28T00:00:00",
     "DateModified": "2025-11-28T00:00:00",
     "IsActive": true
   },
   {
-    "Id": "00000000-0000-0000-0000-000000000004",
     "PowerUpName": "Tile Swap",
     "PowerUpType": 3,
     "Description": "Swap positions of any two tiles",
@@ -56,15 +55,15 @@
     "Cost": 250,
     "Cooldown": 6,
     "IsUnlocked": true,
-    "UsageCount": 26,
+    "UsageCount": 352,
     "EffectMultiplier": 1,
-    "IconUrl": "🔄",
+    "IconUrl": "\uD83D\uDD04",
+    "Id": "00000000-0000-0000-0000-000000000004",
     "DateCreated": "2025-11-28T00:00:00",
     "DateModified": "2025-11-28T00:00:00",
     "IsActive": true
   },
   {
-    "Id": "00000000-0000-0000-0000-000000000005",
     "PowerUpName": "Triple Score",
     "PowerUpType": 0,
     "Description": "Triple all points earned for 5 moves",
@@ -75,6 +74,7 @@
     "UsageCount": 0,
     "EffectMultiplier": 3,
     "IconUrl": "✨",
+    "Id": "00000000-0000-0000-0000-000000000005",
     "DateCreated": "2025-11-28T00:00:00",
     "DateModified": "2025-11-28T00:00:00",
     "IsActive": true
