@@ -1,4 +1,5 @@
 using Bakery2048.Models;
+using System.Text.Json.Serialization;
 
 public class PowerUp : BaseEntity
 {
@@ -14,7 +15,8 @@ public class PowerUp : BaseEntity
     public double EffectMultiplier { get; set; }
     public string IconUrl { get; set; }
 
-    // Convenience property
+    // Convenience property - not serialized
+    [JsonIgnore]
     public Guid PowerUpId => Id; // Alias for Id
 
     public PowerUp(string powerUpName, PowerUpType powerUpType, int cost) : base()
