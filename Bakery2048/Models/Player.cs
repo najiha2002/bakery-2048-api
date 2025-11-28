@@ -1,7 +1,9 @@
-public class Player
+using Bakery2048.Models;
+
+public class Player : BaseEntity
 {
-    public Guid PlayerId { get; set; }
-    public string Name { get; set; }
+    // Inherited from BaseEntity: Id, DateCreated, DateModified, IsActive
+    public string Username { get; set; }
     public string Email { get; set; }
     public int HighestScore { get; set; }
     public int CurrentScore { get; set; }
@@ -9,19 +11,21 @@ public class Player
     public int Level { get; set; }
     public int GamesPlayed { get; set; }
     public double AverageScore { get; set; }
-    public DateTime DateRegistered { get; set; }
-    public DateTime LastPlayed { get; set; }
-    public bool IsActive { get; set; }
     public TimeSpan TotalPlayTime { get; set; }
     public int WinStreak { get; set; }
     public int TotalMoves { get; set; }
     public int PowerUpsUsed { get; set; }
+    public List<string> PowerUpHistory { get; set; } = new List<string>(); // Track which power-ups were used
     public string FavoriteItem { get; set; }
 
-    public Player(string name, string email = "")
+    // Convenience properties that map to base class
+    public Guid PlayerId => Id; // Alias for Id
+    public DateTime DateRegistered => DateCreated; // Alias for DateCreated
+    public DateTime LastPlayed { get => DateModified; set => DateModified = value; } // Alias for DateModified
+
+    public Player(string username, string email = "") : base()
     {
-        PlayerId = Guid.NewGuid();
-        Name = name;
+        Username = username;
         Email = email;
         HighestScore = 0;
         CurrentScore = 0;
@@ -29,13 +33,11 @@ public class Player
         Level = 1;
         GamesPlayed = 0;
         AverageScore = 0.0;
-        DateRegistered = DateTime.Now;
-        LastPlayed = DateTime.Now;
-        IsActive = true;
         TotalPlayTime = TimeSpan.Zero;
         WinStreak = 0;
         TotalMoves = 0;
         PowerUpsUsed = 0;
+        PowerUpHistory = new List<string>();
         FavoriteItem = string.Empty;
     }
 
@@ -81,7 +83,7 @@ public class Player
 
     public string GetPlayerStats()
     {
-        return $"Player: {Name}\n" +
+        return $"Player: {Username}\n" +
                $"ID: {PlayerId}\n" +
                $"Email: {Email}\n" +
                $"Level: {Level}\n" +
@@ -122,22 +124,13 @@ public class Player
         TotalMoves += moves;
     }
 
-    public void UsePowerUp()
+    public void UsePowerUp(string powerUpName)
     {
         PowerUpsUsed++;
+        PowerUpHistory.Add(powerUpName);
     }
 
-    // Deactivate player account
-    public void Deactivate()
-    {
-        IsActive = false;
-    }
-
-    // Reactivate player account
-    public void Activate()
-    {
-        IsActive = true;
-    }
+    // Player-specific deactivate/activate methods removed - use inherited methods from BaseEntity
 
     public int GetDaysSinceRegistration()
     {
@@ -186,7 +179,7 @@ public class Player
     // Get summary for leaderboard display
     public string GetLeaderboardEntry()
     {
-        return $"{Name} - Level {Level} - Score: {HighestScore}";
+        return $"{Username} - Level {Level} - Score: {HighestScore}";
     }
 
     // reset current game stats (for new game)
@@ -196,7 +189,7 @@ public class Player
     }
 
     // Record a complete game session
-    public void RecordGameSession(int finalScore, int bestTileAchieved, int movesMade, TimeSpan playDuration, bool reachedWinCondition = false)
+    public void RecordGameSession(int finalScore, int bestTileAchieved, int movesMade, TimeSpan playDuration, List<string>? powerUpsUsedInSession = null, bool reachedWinCondition = false)
     {
         // Update scores
         CurrentScore = finalScore;
@@ -220,6 +213,13 @@ public class Player
         // Add moves to total
         TotalMoves += movesMade;
 
+        // Record power-ups used
+        if (powerUpsUsedInSession != null && powerUpsUsedInSession.Count > 0)
+        {
+            PowerUpsUsed += powerUpsUsedInSession.Count;
+            PowerUpHistory.AddRange(powerUpsUsedInSession);
+        }
+
         // Add play time
         TotalPlayTime += playDuration;
 
@@ -238,6 +238,30 @@ public class Player
 
         // Auto level up based on score
         CalculateLevelFromScore();
+    }
+
+    // Get most used power-up
+    public string? GetMostUsedPowerUp()
+    {
+        if (PowerUpHistory.Count == 0) return null;
+
+        return PowerUpHistory.GroupBy(p => p)
+                             .OrderByDescending(g => g.Count())
+                             .First()
+                             .Key;
+    }
+
+    // Get power-up usage frequency
+    public Dictionary<string, int> GetPowerUpUsageStats()
+    {
+        return PowerUpHistory.GroupBy(p => p)
+                             .ToDictionary(g => g.Key, g => g.Count());
+    }
+
+    // Get average power-ups per game
+    public double GetAveragePowerUpsPerGame()
+    {
+        return GamesPlayed > 0 ? (double)PowerUpsUsed / GamesPlayed : 0;
     }
 }
 

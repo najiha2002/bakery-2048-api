@@ -1,14 +1,10 @@
 using System.Text.Json;
+using Bakery2048.Services;
 
-public class PlayerService
+public class PlayerService : BaseService<Player>
 {
-    private List<Player> players;
-    private readonly string dataFilePath = "players.json";
-
-    public PlayerService(List<Player> playerList)
+    public PlayerService(List<Player> playerList) : base(playerList, "players.json")
     {
-        players = playerList;
-        LoadFromFile();
     }
 
     public void RegisterPlayer()
@@ -25,7 +21,7 @@ public class PlayerService
         }
 
         // Check if player already exists
-        if (players.Any(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+        if (items.Any(p => p.Username.Equals(name, StringComparison.OrdinalIgnoreCase)))
         {
             Console.WriteLine($"Player '{name}' already registered.");
             return;
@@ -41,7 +37,7 @@ public class PlayerService
         }
 
         Player newPlayer = new Player(name, email);
-        players.Add(newPlayer);
+        items.Add(newPlayer);
 
         SaveToFile();
 
@@ -49,39 +45,47 @@ public class PlayerService
         Console.WriteLine($"Player ID: {newPlayer.PlayerId}");
         Console.WriteLine($"Registration Date: {newPlayer.DateRegistered:yyyy-MM-dd HH:mm}");
         Console.WriteLine($"Starting Rank: {newPlayer.GetRankCategory()}");
-        Console.WriteLine("\nYou can now start playing and recording game sessions!");
+        Console.WriteLine("\nYou can now start playing and recording game sessions! Do you want to record a game session now? (yes/no): ");
+
+        string? recordNow = Console.ReadLine()?.ToLower();
+        if (recordNow == "yes" || recordNow == "y")
+        {
+            RecordGameSession(newPlayer);
+        }
     }
 
     public void ViewAllPlayers()
     {
         Console.WriteLine("\n=== All Players ===");
 
-        if (players.Count == 0)
+        if (items.Count == 0)
         {
             Console.WriteLine("No players found.");
             return;
         }
 
-        Console.WriteLine($"{"Name",-20} {"Level",-8} {"High Score",-12} {"Games Played",-15} {"Status",-10}");
+        Console.WriteLine($"{"Username",-20} {"Level",-8} {"High Score",-12} {"Games Played",-15} {"Status",-10}");
         Console.WriteLine(new string('-', 75));
 
-        foreach (var player in players)
+        foreach (var player in items)
         {
             string status = player.IsActive ? "Active" : "Inactive";
-            Console.WriteLine($"{player.Name,-20} {player.Level,-8} {player.HighestScore,-12} {player.GamesPlayed,-15} {status,-10}");
+            Console.WriteLine($"{player.Username,-20} {player.Level,-8} {player.HighestScore,-12} {player.GamesPlayed,-15} {status,-10}");
         }
+
+        PauseForUser();
     }
 
     public void SearchPlayer()
     {
-        Console.Write("\nEnter player name to search: ");
+        Console.Write("\nEnter player username to search: ");
         string searchName = Console.ReadLine() ?? "";
 
-        var foundPlayers = players.Where(p => p.Name.Contains(searchName, StringComparison.OrdinalIgnoreCase)).ToList();
+        var foundPlayers = items.Where(p => p.Username.Contains(searchName, StringComparison.OrdinalIgnoreCase)).ToList();
 
         if (foundPlayers.Count == 0)
         {
-            Console.WriteLine($"No players found with name containing '{searchName}'.");
+            Console.WriteLine($"No players found with username containing '{searchName}'.");
             return;
         }
 
@@ -92,14 +96,16 @@ public class PlayerService
             Console.WriteLine($"Rank: {player.GetRankCategory()}");
             Console.WriteLine(new string('-', 50));
         }
+
+        PauseForUser();
     }
 
     public void UpdatePlayer()
     {
-        Console.Write("\nEnter player name to update: ");
+        Console.Write("\nEnter player username to update: ");
         string searchName = Console.ReadLine() ?? "";
 
-        var player = players.FirstOrDefault(p => p.Name.Equals(searchName, StringComparison.OrdinalIgnoreCase));
+        var player = items.FirstOrDefault(p => p.Username.Equals(searchName, StringComparison.OrdinalIgnoreCase));
 
         if (player == null)
         {
@@ -107,7 +113,7 @@ public class PlayerService
             return;
         }
 
-        Console.WriteLine($"\nUpdating player: {player.Name}");
+        Console.WriteLine($"\nUpdating player: {player.Username}");
         Console.WriteLine("1. Update Email");
         Console.WriteLine("2. Update Score");
         Console.WriteLine("3. Update Level");
@@ -183,14 +189,16 @@ public class PlayerService
         }
 
         SaveToFile();
+        
+        PauseForUser();
     }
 
     public void DeletePlayer()
     {
-        Console.Write("\nEnter player name to delete: ");
+        Console.Write("\nEnter player username to delete: ");
         string searchName = Console.ReadLine() ?? "";
 
-        var player = players.FirstOrDefault(p => p.Name.Equals(searchName, StringComparison.OrdinalIgnoreCase));
+        var player = items.FirstOrDefault(p => p.Username.Equals(searchName, StringComparison.OrdinalIgnoreCase));
 
         if (player == null)
         {
@@ -198,56 +206,60 @@ public class PlayerService
             return;
         }
 
-        Console.Write($"Are you sure you want to delete player '{player.Name}'? (yes/no): ");
+        Console.Write($"Are you sure you want to delete player '{player.Username}'? (yes/no): ");
         string confirm = Console.ReadLine()?.ToLower() ?? "";
 
         if (confirm == "yes" || confirm == "y")
         {
-            players.Remove(player);
+            items.Remove(player);
             SaveToFile();
-            Console.WriteLine($"✓ Player '{player.Name}' deleted successfully.");
+            Console.WriteLine($"✓ Player '{player.Username}' deleted successfully.");
         }
         else
         {
             Console.WriteLine("Deletion cancelled.");
         }
+
+        PauseForUser();
     }
 
     public void ViewPlayerStatistics()
     {
-        if (players.Count == 0)
+        if (items.Count == 0)
         {
             Console.WriteLine("\nNo players available for statistics.");
             return;
         }
 
         Console.WriteLine("\n=== Player Statistics ===");
-        Console.WriteLine($"Total Players: {players.Count}");
-        Console.WriteLine($"Active Players: {players.Count(p => p.IsActive)}");
-        Console.WriteLine($"Inactive Players: {players.Count(p => !p.IsActive)}");
-        Console.WriteLine($"Average Score: {players.Average(p => p.HighestScore):F2}");
-        Console.WriteLine($"Highest Score: {players.Max(p => p.HighestScore)}");
-        Console.WriteLine($"Total Games Played: {players.Sum(p => p.GamesPlayed)}");
+        Console.WriteLine($"Total Players: {items.Count}");
+        Console.WriteLine($"Active Players: {items.Count(p => p.IsActive)}");
+        Console.WriteLine($"Inactive Players: {items.Count(p => !p.IsActive)}");
+        Console.WriteLine($"Average Score: {items.Average(p => p.HighestScore):F2}");
+        Console.WriteLine($"Highest Score: {items.Max(p => p.HighestScore)}");
+        Console.WriteLine($"Total Games Played: {items.Sum(p => p.GamesPlayed)}");
 
-        var topPlayer = players.OrderByDescending(p => p.HighestScore).FirstOrDefault();
+        var topPlayer = items.OrderByDescending(p => p.HighestScore).FirstOrDefault();
         if (topPlayer != null)
         {
-            Console.WriteLine($"\n🏆 Top Player: {topPlayer.Name}");
+            Console.WriteLine($"\n🏆 Top Player: {topPlayer.Username}");
             Console.WriteLine($"   Score: {topPlayer.HighestScore}");
             Console.WriteLine($"   Rank: {topPlayer.GetRankCategory()}");
         }
 
         Console.WriteLine("\n=== Top 5 Leaderboard ===");
-        var top5 = players.OrderByDescending(p => p.HighestScore).Take(5);
+        var top5 = items.OrderByDescending(p => p.HighestScore).Take(5);
         int rank = 1;
         foreach (var player in top5)
         {
             Console.WriteLine($"{rank}. {player.GetLeaderboardEntry()} - {player.GetRankCategory()}");
             rank++;
         }
+
+        PauseForUser();
     }
 
-    public void ShowMenu()
+    public override void ShowMenu()
     {
         bool back = false;
 
@@ -256,7 +268,7 @@ public class PlayerService
             Console.WriteLine("\n=== Player Management ===");
             Console.WriteLine("1. Register New Player");
             Console.WriteLine("2. View All Players");
-            Console.WriteLine("3. Search Player by Name");
+            Console.WriteLine("3. Search Player by Username");
             Console.WriteLine("4. Update Player Info");
             Console.WriteLine("5. Delete Player");
             Console.WriteLine("6. View Player Statistics");
@@ -299,21 +311,24 @@ public class PlayerService
         }
     }
 
-    public void RecordGameSession()
+    public void RecordGameSession(Player? player = null)
     {
-        // get player by name
-        Console.Write("\nEnter player name: ");
-        string searchName = Console.ReadLine() ?? "";
-
-        var player = players.FirstOrDefault(p => p.Name.Equals(searchName, StringComparison.OrdinalIgnoreCase));
-
+        // get player by username if not provided
         if (player == null)
         {
-            Console.WriteLine($"Player '{searchName}' not found.");
-            return;
+            Console.Write("\nEnter player username: ");
+            string searchName = Console.ReadLine() ?? "";
+
+            player = items.FirstOrDefault(p => p.Username.Equals(searchName, StringComparison.OrdinalIgnoreCase));
+
+            if (player == null)
+            {
+                Console.WriteLine($"Player '{searchName}' not found.");
+                return;
+            }
         }
 
-        Console.WriteLine($"\n=== Recording Game Session for {player.Name} ===");
+        Console.WriteLine($"\n=== Recording Game Session for {player.Username} ===");
 
         // get final score
         Console.Write("Enter final score: ");
@@ -347,12 +362,29 @@ public class PlayerService
             return;
         }
 
+        // Get power-ups used with names
+        List<string> powerUpsUsedInSession = new List<string>();
+        Console.Write("Enter number of power-ups used (0 if none): ");
+        if (int.TryParse(Console.ReadLine(), out int powerUpCount) && powerUpCount > 0)
+        {
+            Console.WriteLine("\nEnter the name of each power-up used:");
+            for (int i = 1; i <= powerUpCount; i++)
+            {
+                Console.Write($"Power-up #{i}: ");
+                string? powerUpName = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(powerUpName))
+                {
+                    powerUpsUsedInSession.Add(powerUpName.Trim());
+                }
+            }
+        }
+
         // check if reached win condition (e.g., 2048 tile)
         bool reachedWin = bestTile >= 2048 ? true : false;
 
         // record the session
         TimeSpan playDuration = TimeSpan.FromMinutes(minutes);
-        player.RecordGameSession(finalScore, bestTile, moves, playDuration, reachedWin);
+        player.RecordGameSession(finalScore, bestTile, moves, playDuration, powerUpsUsedInSession.Count > 0 ? powerUpsUsedInSession : null, reachedWin);
 
         SaveToFile();
 
@@ -364,47 +396,8 @@ public class PlayerService
         Console.WriteLine($"Current Level: {player.Level}");
         Console.WriteLine($"Rank: {player.GetRankCategory()}");
         Console.WriteLine($"Win Streak: {player.WinStreak}");
-    }
-
-    private void SaveToFile()
-    {
-        try
-        {
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = true
-            };
-
-            string jsonString = JsonSerializer.Serialize(players, options);
-            File.WriteAllText(dataFilePath, jsonString);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error saving data: {ex.Message}");
-        }
-    }
-
-    private void LoadFromFile()
-    {
-        try
-        {
-            if (File.Exists(dataFilePath))
-            {
-                string jsonString = File.ReadAllText(dataFilePath);
-                var loadedPlayers = JsonSerializer.Deserialize<List<Player>>(jsonString);
-
-                if (loadedPlayers != null)
-                {
-                    players.Clear();
-                    players.AddRange(loadedPlayers);
-                    Console.WriteLine($"✓ Loaded {players.Count} player(s) from file.");
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error loading data: {ex.Message}");
-        }
+        Console.WriteLine($"Total Power-Ups Used: {player.PowerUpsUsed}");
+        
+        PauseForUser();
     }
 }
-
