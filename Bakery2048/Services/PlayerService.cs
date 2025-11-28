@@ -10,46 +10,75 @@ public class PlayerService : BaseService<Player>
 
     public void RegisterPlayer()
     {
-        ConsoleUI.SimpleHeader("Player Registration");
-        
-        string username = ConsoleUI.Prompt("Enter your username", ConsoleColor.Cyan);
-
-        if (string.IsNullOrWhiteSpace(username))
+        while (true)
         {
-            ConsoleUI.Error("Username cannot be empty.");
-            return;
-        }
+            ConsoleUI.SimpleHeader("Player Registration");
+            
+            string username = ConsoleUI.Prompt("Enter your username (or type 'cancel' to exit)", ConsoleColor.Cyan);
 
-        // Check if player already exists
-        if (items.Any(p => p.Username.Equals(username, StringComparison.OrdinalIgnoreCase)))
-        {
-            ConsoleUI.Warning($"Player '{username}' already registered.");
-            return;
-        }
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                ConsoleUI.Error("Username cannot be empty.");
+                Console.WriteLine();
+                continue;
+            }
 
-        string email = ConsoleUI.Prompt("Enter your email", ConsoleColor.Cyan);
+            if (username.Equals("cancel", StringComparison.OrdinalIgnoreCase))
+            {
+                ConsoleUI.Warning("Registration cancelled.");
+                PauseForUser();
+                return;
+            }
 
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            ConsoleUI.Error("Email cannot be empty.");
-            return;
-        }
+            // Check if player already exists
+            if (items.Any(p => p.Username.Equals(username, StringComparison.OrdinalIgnoreCase)))
+            {
+                ConsoleUI.Warning($"Player '{username}' already registered. Please try a different username.");
+                Console.WriteLine();
+                continue;
+            }
 
-        Player newPlayer = new Player(username, email);
-        items.Add(newPlayer);
+            string email = ConsoleUI.Prompt("Enter your email", ConsoleColor.Cyan);
 
-        SaveToFile();
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                ConsoleUI.Error("Email cannot be empty.");
+                Console.WriteLine();
+                continue;
+            }
 
-        Console.WriteLine();
-        ConsoleUI.Success($"Welcome to Bakery 2048, {username}!");
-        ConsoleUI.KeyValue("Player ID", newPlayer.PlayerId.ToString(), ConsoleColor.DarkGray);
-        ConsoleUI.KeyValue("Registration Date", newPlayer.DateRegistered.ToString("yyyy-MM-dd HH:mm"), ConsoleColor.DarkGray);
-        ConsoleUI.KeyValue("Starting Rank", newPlayer.GetRankCategory(), ConsoleColor.Yellow);
-        
-        Console.WriteLine();
-        if (ConsoleUI.Confirm("Do you want to record a game session now?"))
-        {
-            RecordGameSession(newPlayer);
+            try
+            {
+                Player newPlayer = new Player(username, email);
+                items.Add(newPlayer);
+
+                SaveToFile();
+
+                Console.WriteLine();
+                ConsoleUI.Success($"Welcome to Bakery 2048, {username}!");
+                ConsoleUI.KeyValue("Player ID", newPlayer.PlayerId.ToString(), ConsoleColor.DarkGray);
+                ConsoleUI.KeyValue("Registration Date", newPlayer.DateRegistered.ToString("yyyy-MM-dd HH:mm"), ConsoleColor.DarkGray);
+                ConsoleUI.KeyValue("Starting Rank", newPlayer.GetRankCategory(), ConsoleColor.Yellow);
+                
+                Console.WriteLine();
+                if (ConsoleUI.Confirm("Do you want to record a game session now?"))
+                {
+                    RecordGameSession(newPlayer);
+                }
+                else
+                {
+                    PauseForUser();
+                }
+                
+                return; // Exit the loop after successful registration
+            }
+            catch (Exception ex)
+            {
+                ConsoleUI.Error($"Error creating player: {ex.Message}");
+                Console.WriteLine($"Details: {ex}");
+                PauseForUser();
+                return;
+            }
         }
     }
 
