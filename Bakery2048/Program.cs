@@ -1,4 +1,6 @@
-﻿class Program
+﻿using Bakery2048.Utilities;
+
+class Program
 {
     static List<Player> players = new List<Player>();
     static List<Tile> tiles = new List<Tile>();
@@ -11,20 +13,19 @@
         playerService = new PlayerService(players);
         bool exit = false;
 
-        Console.WriteLine("=== Welcome to 2048 Data Management System ===");
+        ConsoleUI.ShowTitle("🍰 Bakery 2048 - Data Management System 🍰");
 
         while (!exit)
         {
-            Console.WriteLine("\nMain Menu:");
-            Console.WriteLine("1. Manage Players");
-            Console.WriteLine("2. Manage Tiles");
-            Console.WriteLine("3. Manage Power-Ups");
-            Console.WriteLine("4. Generate Random Data");
-            Console.WriteLine("5. Run Data Analysis (LINQ)");
-            Console.WriteLine("6. Exit");
-            Console.Write("Select an option (1-6): ");
-
-            string input = Console.ReadLine();
+            ConsoleUI.SimpleHeader("Main Menu");
+            ConsoleUI.MenuOption("1", "Manage Players");
+            ConsoleUI.MenuOption("2", "Manage Tiles");
+            ConsoleUI.MenuOption("3", "Manage Power-Ups");
+            ConsoleUI.MenuOption("4", "Generate Random Data");
+            ConsoleUI.MenuOption("5", "Run Data Analysis (LINQ)");
+            ConsoleUI.MenuOption("6", "Exit");
+            
+            string? input = ConsoleUI.Prompt("\nSelect an option (1-6)", ConsoleColor.Yellow);
 
             switch (input)
             {
@@ -45,10 +46,10 @@
                     break;
                 case "6":
                     exit = true;
-                    Console.WriteLine("Exiting application. Goodbye!");
+                    ConsoleUI.Success("Exiting application. Goodbye!");
                     break;
                 default:
-                    Console.WriteLine("Invalid option. Please try again.");
+                    ConsoleUI.Error("Invalid option. Please try again.");
                     break;
             }
         }
@@ -61,21 +62,25 @@
 
     static void ManageTiles()
     {
-        Console.WriteLine("Tile management menu (CRUD functions to be added)");
+        ConsoleUI.Info("Tile management menu (CRUD functions to be added)");
+        ConsoleUI.PauseForUser();
     }
 
     static void ManagePowerUps()
     {
-        Console.WriteLine("Power-Up management menu (CRUD functions to be added)");
+        ConsoleUI.Info("Power-Up management menu (CRUD functions to be added)");
+        ConsoleUI.PauseForUser();
     }
 
     static void GenerateRandomData()
     {
-        Console.WriteLine("Random data generation logic will go here");
+        ConsoleUI.Info("Random data generation logic will go here");
+        ConsoleUI.PauseForUser();
     }
 
     static void RunAnalysis()
     {
-        Console.WriteLine("LINQ data analysis logic will go here");
+        ConsoleUI.Info("LINQ data analysis logic will go here");
+        ConsoleUI.PauseForUser();
     }
 }

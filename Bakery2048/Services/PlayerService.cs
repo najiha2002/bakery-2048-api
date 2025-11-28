@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Bakery2048.Services;
+using Bakery2048.Utilities;
 
 public class PlayerService : BaseService<Player>
 {
@@ -9,46 +10,44 @@ public class PlayerService : BaseService<Player>
 
     public void RegisterPlayer()
     {
-        Console.WriteLine("\n=== Player Registration ===");
+        ConsoleUI.SimpleHeader("Player Registration");
         
-        Console.Write("Enter your name: ");
-        string name = Console.ReadLine() ?? "";
+        string username = ConsoleUI.Prompt("Enter your username", ConsoleColor.Cyan);
 
-        if (string.IsNullOrWhiteSpace(name))
+        if (string.IsNullOrWhiteSpace(username))
         {
-            Console.WriteLine("Name cannot be empty.");
+            ConsoleUI.Error("Username cannot be empty.");
             return;
         }
 
         // Check if player already exists
-        if (items.Any(p => p.Username.Equals(name, StringComparison.OrdinalIgnoreCase)))
+        if (items.Any(p => p.Username.Equals(username, StringComparison.OrdinalIgnoreCase)))
         {
-            Console.WriteLine($"Player '{name}' already registered.");
+            ConsoleUI.Warning($"Player '{username}' already registered.");
             return;
         }
 
-        Console.Write("Enter your email: ");
-        string email = Console.ReadLine() ?? "";
+        string email = ConsoleUI.Prompt("Enter your email", ConsoleColor.Cyan);
 
         if (string.IsNullOrWhiteSpace(email))
         {
-            Console.WriteLine("Email cannot be empty.");
+            ConsoleUI.Error("Email cannot be empty.");
             return;
         }
 
-        Player newPlayer = new Player(name, email);
+        Player newPlayer = new Player(username, email);
         items.Add(newPlayer);
 
         SaveToFile();
 
-        Console.WriteLine($"\n✓ Welcome to Bakery 2048, {name}!");
-        Console.WriteLine($"Player ID: {newPlayer.PlayerId}");
-        Console.WriteLine($"Registration Date: {newPlayer.DateRegistered:yyyy-MM-dd HH:mm}");
-        Console.WriteLine($"Starting Rank: {newPlayer.GetRankCategory()}");
-        Console.WriteLine("\nYou can now start playing and recording game sessions! Do you want to record a game session now? (yes/no): ");
-
-        string? recordNow = Console.ReadLine()?.ToLower();
-        if (recordNow == "yes" || recordNow == "y")
+        Console.WriteLine();
+        ConsoleUI.Success($"Welcome to Bakery 2048, {username}!");
+        ConsoleUI.KeyValue("Player ID", newPlayer.PlayerId.ToString(), ConsoleColor.DarkGray);
+        ConsoleUI.KeyValue("Registration Date", newPlayer.DateRegistered.ToString("yyyy-MM-dd HH:mm"), ConsoleColor.DarkGray);
+        ConsoleUI.KeyValue("Starting Rank", newPlayer.GetRankCategory(), ConsoleColor.Yellow);
+        
+        Console.WriteLine();
+        if (ConsoleUI.Confirm("Do you want to record a game session now?"))
         {
             RecordGameSession(newPlayer);
         }
@@ -56,45 +55,60 @@ public class PlayerService : BaseService<Player>
 
     public void ViewAllPlayers()
     {
-        Console.WriteLine("\n=== All Players ===");
+        ConsoleUI.SimpleHeader("All Players");
 
         if (items.Count == 0)
         {
-            Console.WriteLine("No players found.");
+            ConsoleUI.Warning("No players found.");
             return;
         }
 
-        Console.WriteLine($"{"Username",-20} {"Level",-8} {"High Score",-12} {"Games Played",-15} {"Status",-10}");
-        Console.WriteLine(new string('-', 75));
+        // Header row
+        string[] headers = { "Username", "Level", "High Score", "Games Played", "Status" };
+        int[] widths = { 20, 8, 12, 15, 10 };
+        ConsoleUI.TableRow(headers, widths, true);
+        ConsoleUI.Divider('─', 75);
 
         foreach (var player in items)
         {
             string status = player.IsActive ? "Active" : "Inactive";
-            Console.WriteLine($"{player.Username,-20} {player.Level,-8} {player.HighestScore,-12} {player.GamesPlayed,-15} {status,-10}");
+            string[] row = { 
+                player.Username, 
+                player.Level.ToString(), 
+                player.HighestScore.ToString(), 
+                player.GamesPlayed.ToString(), 
+                status 
+            };
+            
+            // Color code status
+            Console.Write($"{row[0],-20} {row[1],-8} {row[2],-12} {row[3],-15} ");
+            ConsoleUI.WriteLineColored(row[4], player.IsActive ? ConsoleColor.Green : ConsoleColor.DarkGray);
         }
 
-        PauseForUser();
+        ConsoleUI.PauseForUser();
     }
 
     public void SearchPlayer()
     {
-        Console.Write("\nEnter player username to search: ");
-        string searchName = Console.ReadLine() ?? "";
+        ConsoleUI.SimpleHeader("Search Player");
+        
+        string searchName = ConsoleUI.Prompt("Enter player username to search", ConsoleColor.Cyan);
 
         var foundPlayers = items.Where(p => p.Username.Contains(searchName, StringComparison.OrdinalIgnoreCase)).ToList();
 
         if (foundPlayers.Count == 0)
         {
-            Console.WriteLine($"No players found with username containing '{searchName}'.");
+            ConsoleUI.Warning($"No players found with username containing '{searchName}'.");
             return;
         }
 
-        Console.WriteLine($"\n=== Found {foundPlayers.Count} Player(s) ===");
+        Console.WriteLine();
+        ConsoleUI.WriteLineColored($"Found {foundPlayers.Count} Player(s)", ConsoleColor.Cyan);
         foreach (var player in foundPlayers)
         {
             Console.WriteLine($"\n{player.GetPlayerStats()}");
-            Console.WriteLine($"Rank: {player.GetRankCategory()}");
-            Console.WriteLine(new string('-', 50));
+            ConsoleUI.KeyValue("Rank", player.GetRankCategory(), ConsoleColor.Yellow);
+            ConsoleUI.Divider('─', 50);
         }
 
         PauseForUser();
@@ -102,89 +116,90 @@ public class PlayerService : BaseService<Player>
 
     public void UpdatePlayer()
     {
-        Console.Write("\nEnter player username to update: ");
-        string searchName = Console.ReadLine() ?? "";
+        ConsoleUI.SimpleHeader("Update Player");
+        
+        string searchName = ConsoleUI.Prompt("Enter player username to update", ConsoleColor.Cyan);
 
         var player = items.FirstOrDefault(p => p.Username.Equals(searchName, StringComparison.OrdinalIgnoreCase));
 
         if (player == null)
         {
-            Console.WriteLine($"Player '{searchName}' not found.");
+            ConsoleUI.Error($"Player '{searchName}' not found.");
             return;
         }
 
-        Console.WriteLine($"\nUpdating player: {player.Username}");
-        Console.WriteLine("1. Update Email");
-        Console.WriteLine("2. Update Score");
-        Console.WriteLine("3. Update Level");
-        Console.WriteLine("4. Toggle Active Status");
-        Console.WriteLine("5. Add Play Time");
-        Console.WriteLine("6. Cancel");
-        Console.Write("Select option: ");
-
-        string? choice = Console.ReadLine();
+        Console.WriteLine();
+        ConsoleUI.WriteLineColored($"Updating player: {player.Username}", ConsoleColor.Cyan);
+        ConsoleUI.MenuOption("1", "Update Email");
+        ConsoleUI.MenuOption("2", "Update Score");
+        ConsoleUI.MenuOption("3", "Update Level");
+        ConsoleUI.MenuOption("4", "Toggle Active Status");
+        ConsoleUI.MenuOption("5", "Add Play Time");
+        ConsoleUI.MenuOption("6", "Cancel");
+        
+        string? choice = ConsoleUI.Prompt("Select option", ConsoleColor.Yellow);
 
         switch (choice)
         {
             case "1":
-                Console.Write("Enter new email: ");
-                player.Email = Console.ReadLine() ?? "";
-                Console.WriteLine("✓ Email updated.");
+                string newEmail = ConsoleUI.Prompt("Enter new email", ConsoleColor.Cyan);
+                player.Email = newEmail;
+                ConsoleUI.Success("Email updated.");
                 break;
             case "2":
-                Console.Write("Enter new score: ");
-                if (int.TryParse(Console.ReadLine(), out int score))
+                string scoreInput = ConsoleUI.Prompt("Enter new score", ConsoleColor.Cyan);
+                if (int.TryParse(scoreInput, out int score))
                 {
                     player.UpdateScore(score);
                     player.IncrementGamesPlayed();
-                    Console.WriteLine($"✓ Score updated. New high score: {player.HighestScore}");
+                    ConsoleUI.Success($"Score updated. New high score: {player.HighestScore}");
                 }
                 else
                 {
-                    Console.WriteLine("Invalid score.");
+                    ConsoleUI.Error("Invalid score.");
                 }
                 break;
             case "3":
-                Console.Write("Enter new level: ");
-                if (int.TryParse(Console.ReadLine(), out int level))
+                string levelInput = ConsoleUI.Prompt("Enter new level", ConsoleColor.Cyan);
+                if (int.TryParse(levelInput, out int level))
                 {
                     player.Level = level;
-                    Console.WriteLine("✓ Level updated.");
+                    ConsoleUI.Success("Level updated.");
                 }
                 else
                 {
-                    Console.WriteLine("Invalid level.");
+                    ConsoleUI.Error("Invalid level.");
                 }
                 break;
             case "4":
                 if (player.IsActive)
                 {
                     player.Deactivate();
-                    Console.WriteLine("✓ Player deactivated.");
+                    ConsoleUI.Success("Player deactivated.");
                 }
                 else
                 {
                     player.Activate();
-                    Console.WriteLine("✓ Player activated.");
+                    ConsoleUI.Success("Player activated.");
                 }
                 break;
             case "5":
-                Console.Write("Enter hours played: ");
-                if (double.TryParse(Console.ReadLine(), out double hours))
+                string hoursInput = ConsoleUI.Prompt("Enter hours played", ConsoleColor.Cyan);
+                if (double.TryParse(hoursInput, out double hours))
                 {
                     player.AddPlayTime(TimeSpan.FromHours(hours));
-                    Console.WriteLine($"✓ Play time added. Total: {player.TotalPlayTime.TotalHours:F2} hours");
+                    ConsoleUI.Success($"Play time added. Total: {player.TotalPlayTime.TotalHours:F2} hours");
                 }
                 else
                 {
-                    Console.WriteLine("Invalid hours.");
+                    ConsoleUI.Error("Invalid hours.");
                 }
                 break;
             case "6":
-                Console.WriteLine("Update cancelled.");
+                ConsoleUI.Info("Update cancelled.");
                 return;
             default:
-                Console.WriteLine("Invalid option.");
+                ConsoleUI.Error("Invalid option.");
                 return;
         }
 
@@ -195,29 +210,27 @@ public class PlayerService : BaseService<Player>
 
     public void DeletePlayer()
     {
-        Console.Write("\nEnter player username to delete: ");
-        string searchName = Console.ReadLine() ?? "";
+        ConsoleUI.SimpleHeader("Delete Player");
+        
+        string searchName = ConsoleUI.Prompt("Enter player username to delete", ConsoleColor.Cyan);
 
         var player = items.FirstOrDefault(p => p.Username.Equals(searchName, StringComparison.OrdinalIgnoreCase));
 
         if (player == null)
         {
-            Console.WriteLine($"Player '{searchName}' not found.");
+            ConsoleUI.Error($"Player '{searchName}' not found.");
             return;
         }
 
-        Console.Write($"Are you sure you want to delete player '{player.Username}'? (yes/no): ");
-        string confirm = Console.ReadLine()?.ToLower() ?? "";
-
-        if (confirm == "yes" || confirm == "y")
+        if (ConsoleUI.Confirm($"Are you sure you want to delete player '{player.Username}'?"))
         {
             items.Remove(player);
             SaveToFile();
-            Console.WriteLine($"✓ Player '{player.Username}' deleted successfully.");
+            ConsoleUI.Success($"Player '{player.Username}' deleted successfully.");
         }
         else
         {
-            Console.WriteLine("Deletion cancelled.");
+            ConsoleUI.Info("Deletion cancelled.");
         }
 
         PauseForUser();
@@ -227,36 +240,42 @@ public class PlayerService : BaseService<Player>
     {
         if (items.Count == 0)
         {
-            Console.WriteLine("\nNo players available for statistics.");
+            ConsoleUI.Warning("No players available for statistics.");
             return;
         }
 
-        Console.WriteLine("\n=== Player Statistics ===");
-        Console.WriteLine($"Total Players: {items.Count}");
-        Console.WriteLine($"Active Players: {items.Count(p => p.IsActive)}");
-        Console.WriteLine($"Inactive Players: {items.Count(p => !p.IsActive)}");
-        Console.WriteLine($"Average Score: {items.Average(p => p.HighestScore):F2}");
-        Console.WriteLine($"Highest Score: {items.Max(p => p.HighestScore)}");
-        Console.WriteLine($"Total Games Played: {items.Sum(p => p.GamesPlayed)}");
+        ConsoleUI.SimpleHeader("Player Statistics");
+
+        // Basic stats
+        ConsoleUI.KeyValue("Total Players", items.Count.ToString(), ConsoleColor.Cyan);
+        ConsoleUI.KeyValue("Active Players", items.Count(p => p.IsActive).ToString(), ConsoleColor.Green);
+        ConsoleUI.KeyValue("Inactive Players", items.Count(p => !p.IsActive).ToString(), ConsoleColor.DarkGray);
+        ConsoleUI.KeyValue("Average Score", items.Average(p => p.HighestScore).ToString("F2"), ConsoleColor.Yellow);
+        ConsoleUI.KeyValue("Highest Score", items.Max(p => p.HighestScore).ToString(), ConsoleColor.Magenta);
+        ConsoleUI.KeyValue("Total Games Played", items.Sum(p => p.GamesPlayed).ToString(), ConsoleColor.Blue);
 
         var topPlayer = items.OrderByDescending(p => p.HighestScore).FirstOrDefault();
         if (topPlayer != null)
         {
-            Console.WriteLine($"\n🏆 Top Player: {topPlayer.Username}");
-            Console.WriteLine($"   Score: {topPlayer.HighestScore}");
-            Console.WriteLine($"   Rank: {topPlayer.GetRankCategory()}");
+            Console.WriteLine();
+            ConsoleUI.WriteLineColored("🏆 Top Player", ConsoleColor.Yellow);
+            ConsoleUI.KeyValue("   Username", topPlayer.Username, ConsoleColor.White);
+            ConsoleUI.KeyValue("   Score", topPlayer.HighestScore.ToString(), ConsoleColor.Magenta);
+            ConsoleUI.KeyValue("   Rank", topPlayer.GetRankCategory(), ConsoleColor.Yellow);
         }
 
-        Console.WriteLine("\n=== Top 5 Leaderboard ===");
+        Console.WriteLine();
+        ConsoleUI.WriteLineColored("═══ Top 5 Leaderboard ═══", ConsoleColor.Cyan);
         var top5 = items.OrderByDescending(p => p.HighestScore).Take(5);
         int rank = 1;
         foreach (var player in top5)
         {
-            Console.WriteLine($"{rank}. {player.GetLeaderboardEntry()} - {player.GetRankCategory()}");
+            ConsoleUI.WriteColored($"{rank}. ", ConsoleColor.Yellow);
+            Console.WriteLine($"{player.GetLeaderboardEntry()} - {player.GetRankCategory()}");
             rank++;
         }
 
-        PauseForUser();
+        ConsoleUI.PauseForUser();
     }
 
     public override void ShowMenu()
@@ -265,18 +284,17 @@ public class PlayerService : BaseService<Player>
 
         while (!back)
         {
-            Console.WriteLine("\n=== Player Management ===");
-            Console.WriteLine("1. Register New Player");
-            Console.WriteLine("2. View All Players");
-            Console.WriteLine("3. Search Player by Username");
-            Console.WriteLine("4. Update Player Info");
-            Console.WriteLine("5. Delete Player");
-            Console.WriteLine("6. View Player Statistics");
-            Console.WriteLine("7. Record New Game Session");
-            Console.WriteLine("8. Back to Main Menu");
-            Console.Write("Select an option (1-8): ");
-
-            string? input = Console.ReadLine();
+            ConsoleUI.SimpleHeader("Player Management");
+            ConsoleUI.MenuOption("1", "Register New Player");
+            ConsoleUI.MenuOption("2", "View All Players");
+            ConsoleUI.MenuOption("3", "Search Player by Username");
+            ConsoleUI.MenuOption("4", "Update Player Info");
+            ConsoleUI.MenuOption("5", "Delete Player");
+            ConsoleUI.MenuOption("6", "View Player Statistics");
+            ConsoleUI.MenuOption("7", "Record New Game Session");
+            ConsoleUI.MenuOption("8", "Back to Main Menu");
+            
+            string? input = ConsoleUI.Prompt("\nSelect an option (1-8)", ConsoleColor.Yellow);
 
             switch (input)
             {
@@ -316,62 +334,61 @@ public class PlayerService : BaseService<Player>
         // get player by username if not provided
         if (player == null)
         {
-            Console.Write("\nEnter player username: ");
-            string searchName = Console.ReadLine() ?? "";
+            string searchName = ConsoleUI.Prompt("Enter player username", ConsoleColor.Cyan);
 
             player = items.FirstOrDefault(p => p.Username.Equals(searchName, StringComparison.OrdinalIgnoreCase));
 
             if (player == null)
             {
-                Console.WriteLine($"Player '{searchName}' not found.");
+                ConsoleUI.Error($"Player '{searchName}' not found.");
                 return;
             }
         }
 
-        Console.WriteLine($"\n=== Recording Game Session for {player.Username} ===");
+        ConsoleUI.SimpleHeader($"Recording Game Session for {player.Username}");
 
         // get final score
-        Console.Write("Enter final score: ");
-        if (!int.TryParse(Console.ReadLine(), out int finalScore) || finalScore < 0)
+        string scoreInput = ConsoleUI.Prompt("Enter final score", ConsoleColor.Cyan);
+        if (!int.TryParse(scoreInput, out int finalScore) || finalScore < 0)
         {
-            Console.WriteLine("Invalid score.");
+            ConsoleUI.Error("Invalid score.");
             return;
         }
 
         // get best tile achieved
-        Console.Write("Enter best tile achieved (e.g., 2048, 4096): ");
-        if (!int.TryParse(Console.ReadLine(), out int bestTile) || bestTile < 0)
+        string tileInput = ConsoleUI.Prompt("Enter best tile achieved (e.g., 2048, 4096)", ConsoleColor.Cyan);
+        if (!int.TryParse(tileInput, out int bestTile) || bestTile < 0)
         {
-            Console.WriteLine("Invalid tile value.");
+            ConsoleUI.Error("Invalid tile value.");
             return;
         }
 
         // get moves made
-        Console.Write("Enter number of moves made: ");
-        if (!int.TryParse(Console.ReadLine(), out int moves) || moves < 0)
+        string movesInput = ConsoleUI.Prompt("Enter number of moves made", ConsoleColor.Cyan);
+        if (!int.TryParse(movesInput, out int moves) || moves < 0)
         {
-            Console.WriteLine("Invalid number of moves.");
+            ConsoleUI.Error("Invalid number of moves.");
             return;
         }
 
         // Get play duration
-        Console.Write("Enter play duration in minutes: ");
-        if (!double.TryParse(Console.ReadLine(), out double minutes) || minutes < 0)
+        string durationInput = ConsoleUI.Prompt("Enter play duration in minutes", ConsoleColor.Cyan);
+        if (!double.TryParse(durationInput, out double minutes) || minutes < 0)
         {
-            Console.WriteLine("Invalid duration.");
+            ConsoleUI.Error("Invalid duration.");
             return;
         }
 
-        // Get power-ups used with names
+        // Get power-ups used
         List<string> powerUpsUsedInSession = new List<string>();
-        Console.Write("Enter number of power-ups used (0 if none): ");
-        if (int.TryParse(Console.ReadLine(), out int powerUpCount) && powerUpCount > 0)
+        string powerUpCountInput = ConsoleUI.Prompt("Enter number of power-ups used (0 if none)", ConsoleColor.Cyan);
+        if (int.TryParse(powerUpCountInput, out int powerUpCount) && powerUpCount > 0)
         {
-            Console.WriteLine("\nEnter the name of each power-up used:");
+            Console.WriteLine();
+            ConsoleUI.Info("Enter the name of each power-up used:");
             for (int i = 1; i <= powerUpCount; i++)
             {
-                Console.Write($"Power-up #{i}: ");
-                string? powerUpName = Console.ReadLine();
+                string powerUpName = ConsoleUI.Prompt($"Power-up #{i}", ConsoleColor.Yellow);
                 if (!string.IsNullOrWhiteSpace(powerUpName))
                 {
                     powerUpsUsedInSession.Add(powerUpName.Trim());
@@ -388,15 +405,16 @@ public class PlayerService : BaseService<Player>
 
         SaveToFile();
 
-        Console.WriteLine("\n✓ Game session recorded successfully!");
-        Console.WriteLine($"High Score: {player.HighestScore}");
-        Console.WriteLine($"Best Tile Ever: {player.BestTileAchieved}");
-        Console.WriteLine($"Games Played: {player.GamesPlayed}");
-        Console.WriteLine($"Average Score: {player.AverageScore:F2}");
-        Console.WriteLine($"Current Level: {player.Level}");
-        Console.WriteLine($"Rank: {player.GetRankCategory()}");
-        Console.WriteLine($"Win Streak: {player.WinStreak}");
-        Console.WriteLine($"Total Power-Ups Used: {player.PowerUpsUsed}");
+        Console.WriteLine();
+        ConsoleUI.Success("Game session recorded successfully!");
+        ConsoleUI.KeyValue("High Score", player.HighestScore.ToString(), ConsoleColor.Magenta);
+        ConsoleUI.KeyValue("Best Tile Ever", player.BestTileAchieved.ToString(), ConsoleColor.Yellow);
+        ConsoleUI.KeyValue("Games Played", player.GamesPlayed.ToString(), ConsoleColor.Cyan);
+        ConsoleUI.KeyValue("Average Score", player.AverageScore.ToString("F2"), ConsoleColor.Green);
+        ConsoleUI.KeyValue("Current Level", player.Level.ToString(), ConsoleColor.Blue);
+        ConsoleUI.KeyValue("Rank", player.GetRankCategory(), ConsoleColor.Yellow);
+        ConsoleUI.KeyValue("Win Streak", player.WinStreak.ToString(), ConsoleColor.Magenta);
+        ConsoleUI.KeyValue("Total Power-Ups Used", player.PowerUpsUsed.ToString(), ConsoleColor.DarkGray);
         
         PauseForUser();
     }
