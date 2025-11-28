@@ -10,12 +10,16 @@ class Program
     static PlayerService playerService = null!;
     static TileService tileService = null!;
     static PowerUpService powerUpService = null!;
+    static DataGenerationService dataGenService = null!;
+    static DataAnalysisService dataAnalysisService = null!;
 
     static void Main(string[] args)
     {
         playerService = new PlayerService(players);
         tileService = new TileService(tiles);
         powerUpService = new PowerUpService(powerUps);
+        dataGenService = new DataGenerationService(playerService, tileService, powerUpService);
+        dataAnalysisService = new DataAnalysisService(playerService, tileService, powerUpService);
         bool exit = false;
 
         while (!exit)
@@ -77,13 +81,11 @@ class Program
 
     static void GenerateRandomData()
     {
-        ConsoleUI.Info("Random data generation logic will go here");
-        ConsoleUI.PauseForUser();
+        dataGenService.GenerateAll();
     }
 
     static void RunAnalysis()
     {
-        ConsoleUI.Info("LINQ data analysis logic will go here");
-        ConsoleUI.PauseForUser();
+        dataAnalysisService.ShowAnalysisMenu();
     }
 }
