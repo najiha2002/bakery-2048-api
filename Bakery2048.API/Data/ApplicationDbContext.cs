@@ -26,7 +26,7 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Player>(entity =>
         {
             entity.HasKey(p => p.Id);
-            entity.Property(p => p.Name).IsRequired().HasMaxLength(100);
+            entity.Property(p => p.Username).IsRequired().HasMaxLength(100);
             entity.Property(p => p.Email).IsRequired().HasMaxLength(255);
         });
 
@@ -34,15 +34,15 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Tile>(entity =>
         {
             entity.HasKey(t => t.Id);
-            entity.Property(t => t.Name).IsRequired().HasMaxLength(100);
-            entity.Property(t => t.HexColor).IsRequired().HasMaxLength(7);
+            entity.Property(t => t.ItemName).IsRequired().HasMaxLength(100);
+            entity.Property(t => t.Color).IsRequired().HasMaxLength(7);
         });
 
         // PowerUp configuration
         modelBuilder.Entity<PowerUp>(entity =>
         {
             entity.HasKey(p => p.Id);
-            entity.Property(p => p.Name).IsRequired().HasMaxLength(100);
+            entity.Property(p => p.PowerUpName).IsRequired().HasMaxLength(100);
             entity.Property(p => p.IconUrl).HasMaxLength(500);
         });
 

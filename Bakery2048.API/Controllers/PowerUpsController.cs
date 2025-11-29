@@ -20,14 +20,28 @@ public class PowerUpsController : ControllerBase
 
     // GET: api/powerups - returns all power-ups
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<PowerUp>>> GetPowerUps()
+    public async Task<ActionResult<IEnumerable<PowerUpResponseDto>>> GetPowerUps()
     {
-        return await _context.PowerUps.ToListAsync();
+        var powerUps = await _context.PowerUps.ToListAsync();
+        
+        var powerUpDtos = powerUps.Select(p => new PowerUpResponseDto
+        {
+            Id = p.Id,
+            PowerUpName = p.PowerUpName,
+            Description = p.Description,
+            PowerUpType = p.PowerUpType,
+            IsUnlocked = p.IsUnlocked,
+            IconUrl = p.IconUrl,
+            UsageCount = p.UsageCount,
+            DateCreated = p.DateCreated
+        }).ToList();
+        
+        return Ok(powerUpDtos);
     }
 
     // GET: api/powerups/{id} - returns a specific power-up by ID
     [HttpGet("{id}")]
-    public async Task<ActionResult<PowerUp>> GetPowerUp(int id)
+    public async Task<ActionResult<PowerUpResponseDto>> GetPowerUp(Guid id)
     {
         var powerUp = await _context.PowerUps.FindAsync(id);
 
@@ -36,16 +50,28 @@ public class PowerUpsController : ControllerBase
             return NotFound();
         }
 
-        return powerUp;
+        var powerUpDto = new PowerUpResponseDto
+        {
+            Id = powerUp.Id,
+            PowerUpName = powerUp.PowerUpName,
+            Description = powerUp.Description,
+            PowerUpType = powerUp.PowerUpType,
+            IsUnlocked = powerUp.IsUnlocked,
+            IconUrl = powerUp.IconUrl,
+            UsageCount = powerUp.UsageCount,
+            DateCreated = powerUp.DateCreated
+        };
+
+        return Ok(powerUpDto);
     }
 
     // POST: api/powerups - creates a new power-up
     [HttpPost]
-    public async Task<ActionResult<PowerUp>> CreatePowerUp(CreatePowerUpDto createPowerUpDto)
+    public async Task<ActionResult<PowerUpResponseDto>> CreatePowerUp(CreatePowerUpDto createPowerUpDto)
     {
         var powerUp = new PowerUp
         {
-            Name = createPowerUpDto.Name,
+            PowerUpName = createPowerUpDto.PowerUpName,
             Description = createPowerUpDto.Description,
             PowerUpType = createPowerUpDto.PowerUpType,
             IsUnlocked = createPowerUpDto.IsUnlocked,
@@ -55,19 +81,31 @@ public class PowerUpsController : ControllerBase
         _context.PowerUps.Add(powerUp);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetPowerUp), new { id = powerUp.Id }, powerUp);
+        var powerUpDto = new PowerUpResponseDto
+        {
+            Id = powerUp.Id,
+            PowerUpName = powerUp.PowerUpName,
+            Description = powerUp.Description,
+            PowerUpType = powerUp.PowerUpType,
+            IsUnlocked = powerUp.IsUnlocked,
+            IconUrl = powerUp.IconUrl,
+            UsageCount = powerUp.UsageCount,
+            DateCreated = powerUp.DateCreated
+        };
+
+        return CreatedAtAction(nameof(GetPowerUp), new { id = powerUp.Id }, powerUpDto);
     }
 
     // PUT: api/powerups/{id} - updates an existing power-up
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdatePowerUp(int id, UpdatePowerUpDto updatePowerUpDto)
+    public async Task<IActionResult> UpdatePowerUp(Guid id, UpdatePowerUpDto updatePowerUpDto)
     {
         var powerUp = await _context.PowerUps.FindAsync(id);
         if (powerUp == null)        
         {
             return NotFound();
         }
-        powerUp.Name = updatePowerUpDto.Name;
+        powerUp.PowerUpName = updatePowerUpDto.PowerUpName;
         powerUp.Description = updatePowerUpDto.Description;
         powerUp.PowerUpType = updatePowerUpDto.PowerUpType;
         powerUp.IsUnlocked = updatePowerUpDto.IsUnlocked;
@@ -80,7 +118,7 @@ public class PowerUpsController : ControllerBase
 
     // DELETE: api/powerups/{id} - deletes a power-up
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeletePowerUp(int id)
+    public async Task<IActionResult> DeletePowerUp(Guid id)
     {
         var powerUp = await _context.PowerUps.FindAsync(id);
         if (powerUp == null)

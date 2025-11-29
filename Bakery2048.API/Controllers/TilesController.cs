@@ -20,14 +20,26 @@ public class TilesController : ControllerBase
 
     // GET: api/tiles - returns all tiles
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Tile>>> GetTiles()
+    public async Task<ActionResult<IEnumerable<TileResponseDto>>> GetTiles()
     {
-        return await _context.Tiles.ToListAsync();
+        var tiles = await _context.Tiles.ToListAsync();
+        
+        var tileDtos = tiles.Select(t => new TileResponseDto
+        {
+            Id = t.Id,
+            ItemName = t.ItemName,
+            TileValue = t.TileValue,
+            Color = t.Color,
+            Icon = t.Icon,
+            DateCreated = t.DateCreated
+        }).ToList();
+        
+        return Ok(tileDtos);
     }
 
     // GET: api/tiles/{id} - returns a specific tile by ID
     [HttpGet("{id}")]
-    public async Task<ActionResult<Tile>> GetTile(int id)
+    public async Task<ActionResult<TileResponseDto>> GetTile(Guid id)
     {
         var tile = await _context.Tiles.FindAsync(id);
 
@@ -36,39 +48,57 @@ public class TilesController : ControllerBase
             return NotFound();
         }
 
-        return tile;
+        var tileDto = new TileResponseDto
+        {
+            Id = tile.Id,
+            ItemName = tile.ItemName,
+            TileValue = tile.TileValue,
+            Color = tile.Color,
+            Icon = tile.Icon,
+            DateCreated = tile.DateCreated
+        };
+
+        return Ok(tileDto);
     }
 
     // POST: api/tiles - creates a new tile
     [HttpPost]
-    public async Task<ActionResult<Tile>> CreateTile(CreateTileDto createTileDto)
+    public async Task<ActionResult<TileResponseDto>> CreateTile(CreateTileDto createTileDto)
     {
-        var tile = new Tile
+        var tile = new Tile(createTileDto.ItemName, createTileDto.TileValue)
         {
-            Name = createTileDto.Name,
-            Value = createTileDto.Value,
-            HexColor = createTileDto.HexColor,
-            IconUrl = createTileDto.IconUrl
+            Color = createTileDto.Color,
+            Icon = createTileDto.Icon
         };
         _context.Tiles.Add(tile);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetTile), new { id = tile.Id }, tile);
+        var tileDto = new TileResponseDto
+        {
+            Id = tile.Id,
+            ItemName = tile.ItemName,
+            TileValue = tile.TileValue,
+            Color = tile.Color,
+            Icon = tile.Icon,
+            DateCreated = tile.DateCreated
+        };
+
+        return CreatedAtAction(nameof(GetTile), new { id = tile.Id }, tileDto);
     }
 
     // PUT: api/tiles/{id} - updates an existing tile
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateTile(int id, UpdateTileDto updateTileDto)
+    public async Task<IActionResult> UpdateTile(Guid id, UpdateTileDto updateTileDto)
     {
         var tile = await _context.Tiles.FindAsync(id);
         if (tile == null)
         {
             return NotFound();
         }
-        tile.Name = updateTileDto.Name;
-        tile.Value = updateTileDto.Value;
-        tile.HexColor = updateTileDto.HexColor;
-        tile.IconUrl = updateTileDto.IconUrl;
+        tile.ItemName = updateTileDto.ItemName;
+        tile.TileValue = updateTileDto.TileValue;
+        tile.Color = updateTileDto.Color;
+        tile.Icon = updateTileDto.Icon;
         await _context.SaveChangesAsync();
 
         return NoContent();
@@ -76,7 +106,7 @@ public class TilesController : ControllerBase
 
     // DELETE: api/tiles/{id} - deletes a tile
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteTile(int id)
+    public async Task<IActionResult> DeleteTile(Guid id)
     {
         var tile = await _context.Tiles.FindAsync(id);
         if (tile == null)
