@@ -10,6 +10,7 @@ public class TilesController : ControllerBase
 {
     private readonly TileService _tileService;
 
+    // constructor injection of TileService
     public TilesController(TileService tileService)
     {
         _tileService = tileService;
@@ -31,6 +32,7 @@ public class TilesController : ControllerBase
             DateCreated = t.DateCreated
         }).ToList();
         
+        // return a 200 OK response with the tile data
         return Ok(tileDtos);
     }
 
@@ -54,14 +56,16 @@ public class TilesController : ControllerBase
             Icon = tile.Icon,
             DateCreated = tile.DateCreated
         };
-
+        
+        // return a 200 OK response with the tile data
         return Ok(tileDto);
     }
 
     // POST: api/tiles - creates a new tile
     [HttpPost]
-    public async Task<ActionResult<TileResponseDto>> CreateTile(CreateTileDto createTileDto)
+    public async Task<ActionResult<TileResponseDto>> CreateTile(CreateTileDto createTileDto) // receives createTileDto of type CreateTileDto object
     {
+        // save the new tile into database using the service
         var tile = await _tileService.CreateTile(
             createTileDto.ItemName, 
             createTileDto.TileValue, 
@@ -69,6 +73,7 @@ public class TilesController : ControllerBase
             createTileDto.Icon
         );
 
+        // create a TileResponseDto to return as response
         var tileDto = new TileResponseDto
         {
             Id = tile.Id,
@@ -79,6 +84,7 @@ public class TilesController : ControllerBase
             DateCreated = tile.DateCreated
         };
 
+        // return a 201 Created response with the location of the new tile
         return CreatedAtAction(nameof(GetTile), new { id = tile.Id }, tileDto);
     }
 
@@ -86,6 +92,7 @@ public class TilesController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateTile(Guid id, UpdateTileDto updateTileDto)
     {
+        // update the tile in the database using the service
         var tile = await _tileService.UpdateTile(
             id, 
             updateTileDto.ItemName, 
@@ -99,6 +106,7 @@ public class TilesController : ControllerBase
             return NotFound();
         }
 
+        // successful update, return 204 No Content
         return NoContent();
     }
 
@@ -113,6 +121,7 @@ public class TilesController : ControllerBase
             return NotFound();
         }
 
+        // successful deletion, return 204 No Content
         return NoContent();
     }
 }
