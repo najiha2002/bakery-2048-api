@@ -31,6 +31,24 @@ public class TileService
 
     public async Task<Tile> CreateTile(string itemName, int tileValue, string color, string icon)
     {
+        // check if an active tile with the same value already exists
+        var existingTileByValue = await _context.Tiles
+            .FirstOrDefaultAsync(t => t.TileValue == tileValue && t.IsActive);
+        
+        if (existingTileByValue != null)
+        {
+            throw new InvalidOperationException($"An active tile with value {tileValue} already exists.");
+        }
+
+        // check if an active tile with the same name already exists
+        var existingTileByName = await _context.Tiles
+            .FirstOrDefaultAsync(t => t.ItemName == itemName && t.IsActive);
+        
+        if (existingTileByName != null)
+        {
+            throw new InvalidOperationException($"An active tile with name '{itemName}' already exists.");
+        }
+
         var tile = new Tile(itemName, tileValue)
         {
             Color = color,
