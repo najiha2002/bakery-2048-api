@@ -65,27 +65,34 @@ public class TilesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<TileResponseDto>> CreateTile(CreateTileDto createTileDto) // receives createTileDto of type CreateTileDto object
     {
-        // save the new tile into database using the service
-        var tile = await _tileService.CreateTile(
-            createTileDto.ItemName, 
-            createTileDto.TileValue, 
-            createTileDto.Color, 
-            createTileDto.Icon
-        );
-
-        // create a TileResponseDto to return as response
-        var tileDto = new TileResponseDto
+        try
         {
-            Id = tile.Id,
-            ItemName = tile.ItemName,
-            TileValue = tile.TileValue,
-            Color = tile.Color,
-            Icon = tile.Icon,
-            DateCreated = tile.DateCreated
-        };
+            // save the new tile into database using the service
+            var tile = await _tileService.CreateTile(
+                createTileDto.ItemName, 
+                createTileDto.TileValue, 
+                createTileDto.Color, 
+                createTileDto.Icon
+            );
 
-        // return a 201 Created response with the location of the new tile
-        return CreatedAtAction(nameof(GetTile), new { id = tile.Id }, tileDto);
+            // create a TileResponseDto to return as response
+            var tileDto = new TileResponseDto
+            {
+                Id = tile.Id,
+                ItemName = tile.ItemName,
+                TileValue = tile.TileValue,
+                Color = tile.Color,
+                Icon = tile.Icon,
+                DateCreated = tile.DateCreated
+            };
+
+            // return a 201 Created response with the location of the new tile
+            return CreatedAtAction(nameof(GetTile), new { id = tile.Id }, tileDto);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     // PUT: api/tiles/{id} - updates an existing tile
