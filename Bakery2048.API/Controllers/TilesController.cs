@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Bakery2048.API.Data;
 using Bakery2048.API.DTOs;
-using Bakery2048.Models;
+using Bakery2048.API.Services;
 
 namespace Bakery2048.API.Controllers;
 
@@ -10,19 +8,18 @@ namespace Bakery2048.API.Controllers;
 [Route("api/[controller]")]
 public class TilesController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
+    private readonly TileService _tileService;
 
-    // Constructor injection — gives the controller access to the database
-    public TilesController(ApplicationDbContext context)
+    public TilesController(TileService tileService)
     {
-        _context = context;
+        _tileService = tileService;
     }
 
     // GET: api/tiles - returns all tiles
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TileResponseDto>>> GetTiles()
     {
-        var tiles = await _context.Tiles.ToListAsync();
+        var tiles = await _tileService.GetAllTiles();
         
         var tileDtos = tiles.Select(t => new TileResponseDto
         {
@@ -41,7 +38,7 @@ public class TilesController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<TileResponseDto>> GetTile(Guid id)
     {
-        var tile = await _context.Tiles.FindAsync(id);
+        var tile = await _tileService.GetTileById(id);
 
         if (tile == null)
         {
@@ -65,13 +62,12 @@ public class TilesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<TileResponseDto>> CreateTile(CreateTileDto createTileDto)
     {
-        var tile = new Tile(createTileDto.ItemName, createTileDto.TileValue)
-        {
-            Color = createTileDto.Color,
-            Icon = createTileDto.Icon
-        };
-        _context.Tiles.Add(tile);
-        await _context.SaveChangesAsync();
+        var tile = await _tileService.CreateTile(
+            createTileDto.ItemName, 
+            createTileDto.TileValue, 
+            createTileDto.Color, 
+            createTileDto.Icon
+        );
 
         var tileDto = new TileResponseDto
         {
@@ -90,16 +86,18 @@ public class TilesController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateTile(Guid id, UpdateTileDto updateTileDto)
     {
-        var tile = await _context.Tiles.FindAsync(id);
+        var tile = await _tileService.UpdateTile(
+            id, 
+            updateTileDto.ItemName, 
+            updateTileDto.TileValue, 
+            updateTileDto.Color, 
+            updateTileDto.Icon
+        );
+        
         if (tile == null)
         {
             return NotFound();
         }
-        tile.ItemName = updateTileDto.ItemName;
-        tile.TileValue = updateTileDto.TileValue;
-        tile.Color = updateTileDto.Color;
-        tile.Icon = updateTileDto.Icon;
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }
@@ -108,13 +106,12 @@ public class TilesController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTile(Guid id)
     {
-        var tile = await _context.Tiles.FindAsync(id);
-        if (tile == null)
+        var result = await _tileService.DeleteTile(id);
+        
+        if (!result)
         {
             return NotFound();
         }
-        _context.Tiles.Remove(tile);
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }
