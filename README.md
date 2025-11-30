@@ -1,309 +1,213 @@
-# Bakery 2048 - Data Management System
+# Bakery 2048 API
 
-A comprehensive backend data management system for the Bakery 2048 game, built with C# and .NET. This system manages players, bakery item tiles, and power-ups with full CRUD operations, automated data generation, and advanced LINQ analytics.
+A RESTful API for the Bakery 2048 game, built with ASP.NET Core, Entity Framework Core, PostgreSQL, and JWT authentication.
 
 ## Overview
 
-**Bakery 2048** is a themed variation of the popular 2048 puzzle game where players merge bakery items (Flour → Cookie → Cake → Wedding Cake) to achieve higher scores. This backend system provides:
+**Bakery 2048** is a themed variation of the popular 2048 puzzle game where players merge bakery items (Flour → Egg → Butter → Sugar → Donut → Cookie → Cupcake → Slice Cake → Whole Cake) to achieve higher scores.
 
-- **Player Management**: Register, track, and analyze player accounts with comprehensive statistics
-- **Tile Management**: Manage bakery item catalog (tiles with values, icons, colors)
-- **Power-Up Management**: Control special abilities players can use during gameplay
-- **Data Generation**: Automatically generate realistic test data (50-75 players with game sessions)
-- **LINQ Analytics**: Advanced data analysis with 4 comprehensive analytics categories
+This API provides:
+- **User Authentication**: JWT-based registration and login
+- **Player Management**: Track player statistics and game progress
+- **Tile Management**: Manage bakery item catalog with icons and colors
+- **Power-Up Management**: Control special abilities for gameplay
+- **Role-Based Access**: Admin and Player roles with authorization
 
-### What Makes This Project Interesting?
+## Tech Stack
 
-- **Game-focused**: Designed specifically for 2048-style puzzle game mechanics
-- **Data-driven**: Extensive analytics to understand player behavior and game balance
-- **Automated Testing**: Generate realistic test data in seconds
-- **Themed Experience**: All game elements themed around bakery items and baking
-- **Simple Storage**: JSON-based persistence that's easy to read and version control
-
-## Features
-
-### 1. Player Management
-- Register new players with email validation
-- Track game sessions with detailed statistics
-- Automatic rank system (Kitchen Helper → Master Baker)
-- Level progression based on scores
-- Win streak tracking
-- Play time and efficiency metrics
-- Search and filter capabilities
-
-### 2. Tile Management
-- Manage bakery item catalog (Flour, Cookie, Cake, etc.)
-- Assign tile values (2, 4, 8, 16, ... 2048, 4096)
-- Custom icons and color schemes
-- Special/event item marking
-- Active/inactive status management
-- Statistics and analytics
-
-### 3. Power-Up Management
-- Four power-up types:
-  - **ScoreBoost**: Multiply points earned
-  - **TimeExtension**: Extend gameplay duration
-  - **Undo**: Reverse previous moves
-  - **SwapTiles**: Rearrange tile positions
-- Cost and cooldown management
-- Lock/unlock system
-- Usage tracking across all game sessions
-- Effect multipliers
-
-### 4. Data Generation
-- Generate 50-75 random players instantly
-- Simulate 1-3 game sessions per player
-- Realistic score distributions (100-50,000 points)
-- Varied play patterns (casual to hardcore)
-- Automatic power-up usage simulation
-- Execution time: ~0.03 seconds
-
-### 5. LINQ Analytics
-- **Player Analytics**: Score distribution, activity levels, engagement metrics
-- **Power-Up Analytics**: Usage statistics, popularity rankings, cost analysis
-- **Cross-Entity Analysis**: Power-up impact, win rates, elite player behavior
-- **Advanced Queries**: Percentiles, standard deviation, correlation insights
+- **Framework**: .NET 10.0 / ASP.NET Core
+- **Database**: PostgreSQL with Entity Framework Core
+- **Authentication**: JWT Bearer tokens with BCrypt password hashing
+- **API Documentation**: Swagger/OpenAPI with XML comments
+- **Environment Config**: DotNetEnv for secrets management
 
 ## Getting Started
 
 ### Prerequisites
 
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) or higher
-- A code editor (VS Code, Visual Studio, or Rider)
-- Terminal/Command Prompt
+- .NET 10.0 SDK
+- PostgreSQL database
+- Git
 
-### Installation
+### Setup Instructions
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/najiha2002/bakery-2048-backend.git
-   cd bakery-2048-backend
-   ```
-
-2. **Navigate to project folder**
-   ```bash
-   cd Bakery2048
-   ```
-
-3. **Restore dependencies** (optional, done automatically on build)
-   ```bash
-   dotnet restore
-   ```
-
-## How to Run
-
-### Method 1: Using dotnet run
-
+**1. Clone the repository**
 ```bash
-cd Bakery2048
+git clone <repo-url>
+cd bakery-2048-api
+```
+
+**2. Set up environment variables**
+
+Create a `.env` file in the `Bakery2048.API` folder:
+```bash
+DB_HOST=localhost
+DB_NAME=bakery2048
+DB_USER=postgres
+DB_PASSWORD=your_password
+JWT_SECRET_KEY=your_jwt_secret_key
+```
+
+Generate a secure JWT secret key:
+```bash
+openssl rand -base64 32
+```
+
+**3. Create the database**
+```bash
+createdb bakery2048
+# or via psql:
+psql -U postgres -c "CREATE DATABASE bakery2048;"
+```
+
+**4. Run migrations**
+```bash
+cd Bakery2048.API
+dotnet ef database update
+```
+
+This will:
+- Create all tables (Users, Players, Tiles, PowerUps)
+- Seed 9 Tiles (Flour → Whole Cake)
+- Seed 4 PowerUps (Score Boost, Time Extension, Undo, Tile Swap)
+
+**5. Run the application**
+```bash
 dotnet run
 ```
 
-### Method 2: Build and Execute
+The API will be available at `http://localhost:5130`
 
-```bash
-cd Bakery2048
-dotnet build
-dotnet run
+## API Endpoints
+
+### Authentication
+
+**Register a new player**
+```http
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "username": "player1",
+  "email": "player1@example.com",
+  "password": "Password123!"
+}
 ```
 
-### Expected Output
+**Register an admin**
+```http
+POST /api/auth/register
+Content-Type: application/json
 
+{
+  "username": "admin",
+  "email": "admin@example.com",
+  "password": "Admin123!",
+  "role": "Admin"
+}
 ```
-Bakery 2048 - Data Management System
-[1] Manage Players
-[2] Manage Tiles
-[3] Manage Power-Ups
-[4] Generate Random Data
-[5] Run Data Analysis (LINQ)
-[6] Exit
 
-Select an option (1-6):
+**Login**
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "username": "player1",
+  "password": "Password123!"
+}
+```
+
+### Players
+
+- `GET /api/players` - Get all players (optional `?top=N` query)
+- `GET /api/players/{id}` - Get player by ID
+- `PUT /api/players/{id}` - Update player (requires authentication)
+- `DELETE /api/players/{id}` - Delete player (Admin only)
+
+### Tiles
+
+- `GET /api/tiles` - Get all tiles
+- `GET /api/tiles/{id}` - Get tile by ID
+- `POST /api/tiles` - Create tile (Admin only)
+- `PUT /api/tiles/{id}` - Update tile (Admin only)
+- `DELETE /api/tiles/{id}` - Delete tile (Admin only)
+
+### PowerUps
+
+- `GET /api/powerups` - Get all power-ups
+- `GET /api/powerups/{id}` - Get power-up by ID
+- `POST /api/powerups` - Create power-up (Admin only)
+- `PUT /api/powerups/{id}` - Update power-up (Admin only)
+- `DELETE /api/powerups/{id}` - Delete power-up (Admin only)
+
+## Seeded Data
+
+### Tiles (9 items)
+| Value | Name | Icon | Color |
+|-------|------|------|-------|
+| 2 | Flour | 🌾 | #fcefe6 |
+| 4 | Egg | 🥚 | #f2e8cb |
+| 8 | Butter | 🧈 | #f5b682 |
+| 16 | Sugar | 🍬 | #f29446 |
+| 32 | Donut | 🍩 | #f88973ff |
+| 64 | Cookie | 🍪 | #ed7056ff |
+| 128 | Cupcake | 🧁 | #ede291 |
+| 256 | Slice Cake | 🍰 | #fce130 |
+| 512 | Whole Cake | 🎂 | #ffdb4a |
+
+### PowerUps (4 types)
+- **Score Boost** (⚡) - Doubles your score for 30 seconds - $100
+- **Time Extension** (⏰) - Adds 60 seconds to the timer - $150
+- **Undo Move** (↩️) - Undo your last move - $50
+- **Tile Swap** (🔄) - Swap two tiles on the board - $200
+
+## Features
+
+### User & Player System
+- Automatic player creation on registration (for non-admin users)
+- BCrypt password hashing for security
+- JWT tokens with role-based claims
+- Username and email validation
+
+### Admin vs Player Roles
+- **Players**: Can view and update their own profile
+- **Admins**: Full CRUD access to all resources, no player profile created
+
+### Security
+- JWT secret stored in environment variables
+- Password hashing with BCrypt
+- Role-based authorization with `[Authorize(Roles = "Admin")]`
+- Unique indexes on username and email
+
+## Testing
+
+Use the included `.http` file with the REST Client extension:
+```
+Bakery2048.API/Bakery2048.API.http
+```
+
+Or use Swagger UI:
+```
+http://localhost:5130/swagger
 ```
 
 ## Project Structure
 
 ```
-bakery-2048-backend/
-├── Bakery2048/
-│   ├── Models/                    # Data models
-│   │   ├── Player.cs             # Player entity
-│   │   ├── Tile.cs               # Tile entity
-│   │   ├── PowerUp.cs            # PowerUp entity
-│   │   ├── PowerUpType.cs        # Enum for power-up types
-│   │   └── BaseEntity.cs         # Base class for all entities
-│   ├── Services/                  # Business logic
-│   │   ├── BaseService.cs        # Generic CRUD base service
-│   │   ├── PlayerService.cs      # Player management
-│   │   ├── TileService.cs        # Tile management
-│   │   ├── PowerUpService.cs     # Power-up management
-│   │   ├── DataGenerationService.cs   # Test data generation
-│   │   └── DataAnalysisService.cs     # LINQ analytics
-│   ├── Utilities/                 # Helper utilities
-│   │   └── ConsoleUI.cs          # Console formatting helpers
-│   ├── Program.cs                 # Main entry point
-│   ├── players.json              # Player data storage
-│   ├── tiles.json                # Tile data storage
-│   └── powerups.json             # Power-up data storage
-├── docs/                          # Documentation
-│   ├── PLAYER_CRUD_OPERATIONS.md
-│   ├── TILE_CRUD_OPERATIONS.md
-│   └── POWERUP_CRUD_OPERATIONS.md
-└── README.md                      # This file
-```
-
-## Core Functionalities
-
-### 1. Player Management
-
-**Register Player**
-```
-[1] Manage Players → [1] Register New Player
-Enter username: BakerMaster
-Enter email: baker@bakery.com
-✓ Welcome to Bakery 2048, BakerMaster!
-```
-
-**Record Game Session**
-```
-Enter final score: 12450
-Enter best tile: 2048
-Enter moves: 234
-Enter duration: 15.5 minutes
-✓ Game session recorded!
-```
-
-**View Statistics**
-```
-Total Players: 150
-Active Players: 132
-Average Score: 8,543.25
-Highest Score: 95,430 (BobTheBaker)
-```
-
-### 2. Tile Management
-
-**Add Bakery Item**
-```
-[2] Manage Tiles → [1] Add New Tile
-Item name: Rainbow Cake
-Tile value: 4096
-Icon: 🌈
-Color: #FF00FF
-Special item: Yes
-✓ Tile added successfully!
-```
-
-### 3. Power-Up Management
-
-**Add Power-Up**
-```
-[3] Manage Power-Ups → [1] Add New Power-Up
-Name: Double Score
-Type: [1] ScoreBoost
-Cost: 200 points
-Cooldown: 5 moves
-Effect multiplier: 2.0
-Icon: ⚡
-✓ Power-up created!
-```
-
-### 4. Generate Test Data
-
-```
-[4] Generate Random Data
-Continue? (y/n): y
-
-✓ Data generation complete!
-Players Generated: 56
-Game Sessions: 65
-Time: 0.03 seconds
-```
-
-### 5. LINQ Analytics
-
-```
-[5] Run Data Analysis (LINQ)
-[1] Player Analytics
-[2] Power-Up Analytics
-[3] Cross-Entity Analysis
-[4] Advanced Queries
-
-Select category: 1
-
-Player Analytics
-Score Distribution:
-  0-1K:    12 players
-  1K-5K:   23 players
-  5K-10K:  15 players
-  10K-20K: 8 players
-  20K+:    4 players
+Bakery2048.API/
+├── Controllers/         # API endpoints
+├── Services/           # Business logic
+├── Data/               # DbContext and migrations
+├── Models/             # Entity models
+├── DTOs/               # Data transfer objects
+├── Migrations/         # EF Core migrations
+└── Program.cs          # App configuration
 ```
 
 ## Documentation
 
-Detailed documentation for each entity:
+For detailed API documentation, use:
+- **Swagger UI**: `http://localhost:5130/swagger` (when running the application)
+- **REST Client Examples**: [Bakery2048.API.http](Bakery2048.API/Bakery2048.API.http)
 
-- **[Player CRUD Operations](docs/PLAYER_CRUD_OPERATIONS.md)** - Complete player management guide
-- **[Tile CRUD Operations](docs/TILE_CRUD_OPERATIONS.md)** - Bakery item catalog management
-- **[PowerUp CRUD Operations](docs/POWERUP_CRUD_OPERATIONS.md)** - Special abilities management
-
-## Data Persistence
-
-### File-Based Storage
-
-All data is stored in JSON format for easy reading and version control:
-
-- `players.json` - Player accounts and statistics
-- `tiles.json` - Bakery item catalog
-- `powerups.json` - Power-up definitions
-
-### Auto-Save
-
-- Automatic save after every create/update/delete operation
-- Automatic load on service initialization
-- Data integrity maintained through exception handling
-
-### JSON Format Example
-
-**players.json**
-```json
-[
-  {
-    "PlayerId": "7f8a3c2d-1e4b-5a9c-8d7e-6f5a4b3c2d1e",
-    "Username": "BakerMaster",
-    "Email": "baker@bakery.com",
-    "HighestScore": 12450,
-    "Level": 5,
-    "GamesPlayed": 23,
-    "IsActive": true
-  }
-]
-```
-
-
-## Future Enhancements
-
-### Planned Features
-- RESTful API with ASP.NET Core Web API
-- Database integration (Entity Framework Core + SQL Server)
-- Authentication and authorization (JWT)
-- Real-time leaderboards with SignalR
-- Achievement system
-- Friend system and social features
-- Season pass and tournament support
-- Cloud save synchronization
-- Admin dashboard (Blazor/React)
-
-### Technical Improvements
-- Unit tests (xUnit)
-- Integration tests
-- Logging (Serilog)
-- Dependency injection
-- Configuration management
-- Docker containerization
-- CI/CD pipeline (GitHub Actions)
-
----
-
-Happy Baking!

@@ -44,7 +44,7 @@ public class AuthController : ControllerBase
     /// <summary>
     /// Authenticates a user and returns a JWT token
     /// </summary>
-    /// <param name="loginDto">User login credentials (email and password)</param>
+    /// <param name="loginDto">User login credentials (username and password)</param>
     /// <returns>JWT token and user information</returns>
     /// <response code="200">Returns the JWT token and user details</response>
     /// <response code="401">If credentials are invalid</response>
