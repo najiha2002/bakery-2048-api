@@ -49,6 +49,19 @@ public class AuthService
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
+        // create corresponding player record
+        var player = new Player
+        {
+            Username = user.Username,
+            Email = user.Email,
+            HighestScore = 0,
+            CurrentScore = 0,
+            GamesPlayed = 0
+        };
+
+        _context.Players.Add(player);
+        await _context.SaveChangesAsync();
+
         // generate JWT token
         var token = GenerateJwtToken(user);
 
