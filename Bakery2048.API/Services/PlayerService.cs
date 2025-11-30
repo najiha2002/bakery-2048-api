@@ -41,6 +41,15 @@ public class PlayerService
         }
     }
 
+    private void ValidateEmail(string email)
+    {
+        // basic email format validation
+        if (string.IsNullOrWhiteSpace(email) || !Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+        {
+            throw new ArgumentException("Invalid email format.");
+        }
+    }
+
     private async Task ValidatePlayerUniqueness(string username, string email, Guid? excludePlayerId = null)
     {
         // check if an active player with the same username already exists
