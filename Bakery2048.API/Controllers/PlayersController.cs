@@ -67,38 +67,6 @@ public class PlayersController : ControllerBase
         return Ok(playerDto);
     }
 
-    // POST: api/players - creates a new player
-    [Authorize]
-    [HttpPost]
-    public async Task<ActionResult<PlayerResponseDto>> CreatePlayer(CreatePlayerDto createPlayerDto)
-    {
-        try
-        {
-            var player = await _playerService.CreatePlayer(createPlayerDto.Username, createPlayerDto.Email);
-
-            var playerDto = new PlayerResponseDto
-            {
-                Id = player.Id,
-                Username = player.Username,
-                Email = player.Email,
-                HighestScore = player.HighestScore,
-                CurrentScore = player.CurrentScore,
-                GamesPlayed = player.GamesPlayed,
-                DateCreated = player.DateCreated
-            };
-
-            return CreatedAtAction(nameof(GetPlayer), new { id = player.Id }, playerDto);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-    }
-
     // PUT: api/players/{id} - updates an existing player
     [Authorize]
     [HttpPut("{id}")]

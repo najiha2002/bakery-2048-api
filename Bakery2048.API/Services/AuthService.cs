@@ -13,16 +13,22 @@ public class AuthService
 {
     private readonly ApplicationDbContext _context;
     private readonly IConfiguration _configuration;
+    private readonly PlayerService _playerService;
 
-    public AuthService(ApplicationDbContext context, IConfiguration configuration)
+    public AuthService(ApplicationDbContext context, IConfiguration configuration, PlayerService playerService)
     {
         _context = context;
         _configuration = configuration;
+        _playerService = playerService;
     }
 
     // register a new user
     public async Task<AuthResponseDto> Register(RegisterDto registerDto)
     {
+        // Validate username and email format using PlayerService validation
+        _playerService.ValidateUsername(registerDto.Username);
+        _playerService.ValidateEmail(registerDto.Email);
+
         // Check if user already exists
         if (await _context.Users.AnyAsync(u => u.Email == registerDto.Email))
         {
@@ -32,6 +38,12 @@ public class AuthService
         if (await _context.Users.AnyAsync(u => u.Username == registerDto.Username))
         {
             throw new InvalidOperationException("Username is already taken.");
+        }
+
+        // Check if player already exists (double-check)
+        if (await _context.Players.AnyAsync(p => p.Email == registerDto.Email || p.Username == registerDto.Username))
+        {
+            throw new InvalidOperationException("Player with this email or username already exists.");
         }
 
         // hash the password
@@ -50,14 +62,7 @@ public class AuthService
         await _context.SaveChangesAsync();
 
         // create corresponding player record
-        var player = new Player
-        {
-            Username = user.Username,
-            Email = user.Email,
-            HighestScore = 0,
-            CurrentScore = 0,
-            GamesPlayed = 0
-        };
+        var player = new Player(user.Username, user.Email);
 
         _context.Players.Add(player);
         await _context.SaveChangesAsync();

@@ -14,7 +14,7 @@ public class PlayerService
         _context = context;
     }
 
-    private void ValidateUsername(string username)
+    public void ValidateUsername(string username)
     {
         // check if username is empty or whitespace
         if (string.IsNullOrWhiteSpace(username))
@@ -41,7 +41,7 @@ public class PlayerService
         }
     }
 
-    private void ValidateEmail(string email)
+    public void ValidateEmail(string email)
     {
         // basic email format validation
         if (string.IsNullOrWhiteSpace(email) || !Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
