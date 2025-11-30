@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Bakery2048.API.DTOs;
 using Bakery2048.API.Services;
 
@@ -17,6 +18,7 @@ public class PlayersController : ControllerBase
 
     // GET: api/players - returns all players
     // GET: api/players?top=10 - returns top N players by high score
+    [Authorize]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PlayerResponseDto>>> GetPlayers([FromQuery] int? top = null)   
     {
@@ -40,6 +42,7 @@ public class PlayersController : ControllerBase
     }   
 
     // GET: api/players/{id} - returns a specific player by ID
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<ActionResult<PlayerResponseDto>> GetPlayer(Guid id)
     {
@@ -65,6 +68,7 @@ public class PlayersController : ControllerBase
     }
 
     // POST: api/players - creates a new player
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<PlayerResponseDto>> CreatePlayer(CreatePlayerDto createPlayerDto)
     {
@@ -96,6 +100,7 @@ public class PlayersController : ControllerBase
     }
 
     // PUT: api/players/{id} - updates an existing player
+    [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdatePlayer(Guid id, UpdatePlayerDto updatePlayerDto)
     {
@@ -128,6 +133,7 @@ public class PlayersController : ControllerBase
     }
 
     // DELETE: api/players/{id} - deletes a player
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePlayer(Guid id)
     {

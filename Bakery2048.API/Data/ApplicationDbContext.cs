@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Bakery2048.Models;
 using Bakery2048.API.Models;
 
 namespace Bakery2048.API.Data;

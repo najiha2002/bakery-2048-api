@@ -1,5 +1,5 @@
 using Bakery2048.API.Data;
-using Bakery2048.Models;
+using Bakery2048.API.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bakery2048.API.Services;
@@ -32,8 +32,9 @@ public class PowerUpService
 
     public async Task<PowerUp> CreatePowerUp(string name, string description, PowerUpType type, bool isUnlocked, string iconUrl)
     {
-        var powerUp = new PowerUp(name, description, type)
+        var powerUp = new PowerUp(name, type, 0)
         {
+            Description = description,
             IsUnlocked = isUnlocked,
             IconUrl = iconUrl
         };

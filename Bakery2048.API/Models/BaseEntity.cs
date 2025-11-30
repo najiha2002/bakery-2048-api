@@ -1,4 +1,4 @@
-namespace Bakery2048.Models
+namespace Bakery2048.API.Models
 {
     public abstract class BaseEntity
     {
