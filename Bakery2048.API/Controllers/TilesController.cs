@@ -89,6 +89,10 @@ public class TilesController : ControllerBase
             // return a 201 Created response with the location of the new tile
             return CreatedAtAction(nameof(GetTile), new { id = tile.Id }, tileDto);
         }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
         catch (InvalidOperationException ex)
         {
             return BadRequest(new { message = ex.Message });

@@ -1,6 +1,7 @@
 using Bakery2048.API.Data;
 using Bakery2048.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace Bakery2048.API.Services;
 
@@ -11,6 +12,12 @@ public class TileService
     public TileService(ApplicationDbContext context)
     {
         _context = context;
+    }
+
+    private bool IsValidHexColor(string color)
+    {
+        // matches #RGB or #RRGGBB format
+        return Regex.IsMatch(color, @"^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$");
     }
 
     public async Task<List<Tile>> GetAllTiles()
@@ -31,6 +38,12 @@ public class TileService
 
     public async Task<Tile> CreateTile(string itemName, int tileValue, string color, string icon)
     {
+        // validate hex color format
+        if (!IsValidHexColor(color))
+        {
+            throw new ArgumentException($"Invalid color format. Color must be a valid hex code (e.g., #FFFFFF or #FFF).");
+        }
+
         // check if an active tile with the same value already exists
         var existingTileByValue = await _context.Tiles
             .FirstOrDefaultAsync(t => t.TileValue == tileValue && t.IsActive);
