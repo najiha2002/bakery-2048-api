@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Bakery2048.API.DTOs;
 using Bakery2048.API.Services;
 
@@ -17,6 +18,7 @@ public class TilesController : ControllerBase
     }
 
     // GET: api/tiles - returns all tiles
+    [Authorize]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TileResponseDto>>> GetTiles()
     {
@@ -37,6 +39,7 @@ public class TilesController : ControllerBase
     }
 
     // GET: api/tiles/{id} - returns a specific tile by ID
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<ActionResult<TileResponseDto>> GetTile(Guid id)
     {
@@ -62,6 +65,7 @@ public class TilesController : ControllerBase
     }
 
     // POST: api/tiles - creates a new tile
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<ActionResult<TileResponseDto>> CreateTile(CreateTileDto createTileDto) // receives createTileDto of type CreateTileDto object
     {
@@ -100,6 +104,7 @@ public class TilesController : ControllerBase
     }
 
     // PUT: api/tiles/{id} - updates an existing tile
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateTile(Guid id, UpdateTileDto updateTileDto)
     {
@@ -122,6 +127,7 @@ public class TilesController : ControllerBase
     }
 
     // DELETE: api/tiles/{id} - deletes a tile
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTile(Guid id)
     {
