@@ -1,6 +1,7 @@
 using Bakery2048.API.Data;
 using Bakery2048.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace Bakery2048.API.Services;
 
@@ -11,6 +12,33 @@ public class PlayerService
     public PlayerService(ApplicationDbContext context)
     {
         _context = context;
+    }
+
+    private void ValidateUsername(string username)
+    {
+        // check if username is empty or whitespace
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            throw new ArgumentException("Username is required and cannot be empty or whitespace.");
+        }
+
+        // check minimum length
+        if (username.Length < 3)
+        {
+            throw new ArgumentException("Username must be at least 3 characters long.");
+        }
+
+        // check maximum length
+        if (username.Length > 50)
+        {
+            throw new ArgumentException("Username cannot exceed 50 characters.");
+        }
+
+        // check allowed characters (alphanumeric, underscore, hyphen)
+        if (!Regex.IsMatch(username, @"^[a-zA-Z0-9_-]+$"))
+        {
+            throw new ArgumentException("Username can only contain letters, numbers, underscores, and hyphens.");
+        }
     }
 
     private async Task ValidatePlayerUniqueness(string username, string email, Guid? excludePlayerId = null)
@@ -68,6 +96,7 @@ public class PlayerService
 
     public async Task<Player> CreatePlayer(string username, string email)
     {
+        ValidateUsername(username);
         await ValidatePlayerUniqueness(username, email);
 
         var player = new Player(username, email);
@@ -84,6 +113,7 @@ public class PlayerService
             return null;
         }
 
+        ValidateUsername(username);
         await ValidatePlayerUniqueness(username, email, id);
 
         player.Username = username;

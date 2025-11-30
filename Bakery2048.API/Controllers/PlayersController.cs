@@ -85,6 +85,10 @@ public class PlayersController : ControllerBase
 
             return CreatedAtAction(nameof(GetPlayer), new { id = player.Id }, playerDto);
         }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
         catch (InvalidOperationException ex)
         {
             return BadRequest(new { message = ex.Message });
@@ -112,6 +116,10 @@ public class PlayersController : ControllerBase
             }
 
             return NoContent();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
         catch (InvalidOperationException ex)
         {
