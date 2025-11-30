@@ -40,8 +40,9 @@ public class AuthService
             throw new InvalidOperationException("Username is already taken.");
         }
 
-        // Check if player already exists (double-check)
-        if (await _context.Players.AnyAsync(p => p.Email == registerDto.Email || p.Username == registerDto.Username))
+        // Check if player already exists (only for non-admin registrations)
+        var isAdminRegistration = !string.IsNullOrEmpty(registerDto.Role) && registerDto.Role == "Admin";
+        if (!isAdminRegistration && await _context.Players.AnyAsync(p => p.Email == registerDto.Email || p.Username == registerDto.Username))
         {
             throw new InvalidOperationException("Player with this email or username already exists.");
         }
@@ -55,17 +56,19 @@ public class AuthService
             Username = registerDto.Username,
             Email = registerDto.Email,
             PasswordHash = passwordHash,
-            Role = "Player"
+            Role = string.IsNullOrEmpty(registerDto.Role) ? "Player" : registerDto.Role
         };
 
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
-        // create corresponding player record
-        var player = new Player(user.Username, user.Email);
-
-        _context.Players.Add(player);
-        await _context.SaveChangesAsync();
+        // Create corresponding player record only for non-admin users
+        if (user.Role != "Admin")
+        {
+            var player = new Player(user.Username, user.Email);
+            _context.Players.Add(player);
+            await _context.SaveChangesAsync();
+        }
 
         // generate JWT token
         var token = GenerateJwtToken(user);
