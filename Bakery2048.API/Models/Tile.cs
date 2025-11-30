@@ -1,4 +1,4 @@
-using Bakery2048.Models;
+using Bakery2048.API.Models;
 
 public class Tile : BaseEntity
 {

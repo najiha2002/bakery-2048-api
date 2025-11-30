@@ -1,5 +1,5 @@
 using Bakery2048.API.Data;
-using Bakery2048.Models;
+using Bakery2048.API.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 
