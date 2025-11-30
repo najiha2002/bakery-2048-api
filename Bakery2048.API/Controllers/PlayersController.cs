@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Bakery2048.API.Data;
 using Bakery2048.API.DTOs;
-using Bakery2048.Models;
+using Bakery2048.API.Services;
 
 namespace Bakery2048.API.Controllers;
 
@@ -10,12 +8,11 @@ namespace Bakery2048.API.Controllers;
 [Route("api/[controller]")]
 public class PlayersController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
+    private readonly PlayerService _playerService;
 
-    // Constructor injection — gives the controller access to the database
-    public PlayersController(ApplicationDbContext context)
+    public PlayersController(PlayerService playerService)
     {
-        _context = context;
+        _playerService = playerService;
     }
 
     // GET: api/players - returns all players
@@ -23,17 +20,9 @@ public class PlayersController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PlayerResponseDto>>> GetPlayers([FromQuery] int? top = null)   
     {
-        var query = _context.Players.AsQueryable();
-        
-        // If 'top' parameter provided, sort by highest score and limit results
-        if (top.HasValue)
-        {
-            query = query
-                .OrderByDescending(p => p.HighestScore)
-                .Take(top.Value);
-        }
-        
-        var players = await query.ToListAsync();
+        var players = top.HasValue 
+            ? await _playerService.GetTopPlayers(top.Value)
+            : await _playerService.GetAllPlayers();
         
         // Convert to DTOs
         var playerDtos = players.Select(p => new PlayerResponseDto
@@ -54,7 +43,7 @@ public class PlayersController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<PlayerResponseDto>> GetPlayer(Guid id)
     {
-        var player = await _context.Players.FindAsync(id);
+        var player = await _playerService.GetPlayerById(id);
 
         if (player == null)
         {
@@ -79,9 +68,7 @@ public class PlayersController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<PlayerResponseDto>> CreatePlayer(CreatePlayerDto createPlayerDto)
     {
-        var player = new Player(createPlayerDto.Username, createPlayerDto.Email);
-        _context.Players.Add(player);
-        await _context.SaveChangesAsync();
+        var player = await _playerService.CreatePlayer(createPlayerDto.Username, createPlayerDto.Email);
 
         var playerDto = new PlayerResponseDto
         {
@@ -101,17 +88,19 @@ public class PlayersController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdatePlayer(Guid id, UpdatePlayerDto updatePlayerDto)
     {
-        var player = await _context.Players.FindAsync(id);
+        var player = await _playerService.UpdatePlayer(
+            id, 
+            updatePlayerDto.Username, 
+            updatePlayerDto.Email, 
+            updatePlayerDto.HighestScore, 
+            updatePlayerDto.CurrentScore, 
+            updatePlayerDto.GamesPlayed
+        );
+        
         if (player == null)
         {
             return NotFound();  
         }
-        player.Username = updatePlayerDto.Username;
-        player.Email = updatePlayerDto.Email;
-        player.HighestScore = updatePlayerDto.HighestScore;
-        player.CurrentScore = updatePlayerDto.CurrentScore;
-        player.GamesPlayed = updatePlayerDto.GamesPlayed;
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }
@@ -120,14 +109,12 @@ public class PlayersController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePlayer(Guid id)
     {
-        var player = await _context.Players.FindAsync(id);
-        if (player == null)
+        var result = await _playerService.DeletePlayer(id);
+        
+        if (!result)
         {
             return NotFound();
         }
-
-        _context.Players.Remove(player);
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }

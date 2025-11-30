@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Bakery2048.API.Data;
 using Bakery2048.API.DTOs;
-using Bakery2048.Models;
+using Bakery2048.API.Services;
 
 namespace Bakery2048.API.Controllers;
 
@@ -10,19 +8,18 @@ namespace Bakery2048.API.Controllers;
 [Route("api/[controller]")]
 public class PowerUpsController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
+    private readonly PowerUpService _powerUpService;
 
-    // Constructor injection — gives the controller access to the database
-    public PowerUpsController(ApplicationDbContext context)
+    public PowerUpsController(PowerUpService powerUpService)
     {
-        _context = context;
+        _powerUpService = powerUpService;
     }
 
     // GET: api/powerups - returns all power-ups
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PowerUpResponseDto>>> GetPowerUps()
     {
-        var powerUps = await _context.PowerUps.ToListAsync();
+        var powerUps = await _powerUpService.GetAllPowerUps();
         
         var powerUpDtos = powerUps.Select(p => new PowerUpResponseDto
         {
@@ -43,7 +40,7 @@ public class PowerUpsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<PowerUpResponseDto>> GetPowerUp(Guid id)
     {
-        var powerUp = await _context.PowerUps.FindAsync(id);
+        var powerUp = await _powerUpService.GetPowerUpById(id);
 
         if (powerUp == null)
         {
@@ -69,17 +66,13 @@ public class PowerUpsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<PowerUpResponseDto>> CreatePowerUp(CreatePowerUpDto createPowerUpDto)
     {
-        var powerUp = new PowerUp
-        {
-            PowerUpName = createPowerUpDto.PowerUpName,
-            Description = createPowerUpDto.Description,
-            PowerUpType = createPowerUpDto.PowerUpType,
-            IsUnlocked = createPowerUpDto.IsUnlocked,
-            IconUrl = createPowerUpDto.IconUrl,
-            UsageCount = createPowerUpDto.UsageCount
-        };
-        _context.PowerUps.Add(powerUp);
-        await _context.SaveChangesAsync();
+        var powerUp = await _powerUpService.CreatePowerUp(
+            createPowerUpDto.PowerUpName,
+            createPowerUpDto.Description,
+            createPowerUpDto.PowerUpType,
+            createPowerUpDto.IsUnlocked,
+            createPowerUpDto.IconUrl
+        );
 
         var powerUpDto = new PowerUpResponseDto
         {
@@ -100,18 +93,20 @@ public class PowerUpsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdatePowerUp(Guid id, UpdatePowerUpDto updatePowerUpDto)
     {
-        var powerUp = await _context.PowerUps.FindAsync(id);
+        var powerUp = await _powerUpService.UpdatePowerUp(
+            id,
+            updatePowerUpDto.PowerUpName,
+            updatePowerUpDto.Description,
+            updatePowerUpDto.PowerUpType,
+            updatePowerUpDto.IsUnlocked,
+            updatePowerUpDto.IconUrl,
+            updatePowerUpDto.UsageCount
+        );
+        
         if (powerUp == null)        
         {
             return NotFound();
         }
-        powerUp.PowerUpName = updatePowerUpDto.PowerUpName;
-        powerUp.Description = updatePowerUpDto.Description;
-        powerUp.PowerUpType = updatePowerUpDto.PowerUpType;
-        powerUp.IsUnlocked = updatePowerUpDto.IsUnlocked;
-        powerUp.IconUrl = updatePowerUpDto.IconUrl;
-        powerUp.UsageCount = updatePowerUpDto.UsageCount;
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }
@@ -120,13 +115,12 @@ public class PowerUpsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePowerUp(Guid id)
     {
-        var powerUp = await _context.PowerUps.FindAsync(id);
-        if (powerUp == null)
+        var result = await _powerUpService.DeletePowerUp(id);
+        
+        if (!result)
         {
             return NotFound();
         }
-        _context.PowerUps.Remove(powerUp);
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }   
