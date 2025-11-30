@@ -85,18 +85,18 @@ public class AuthService
     // login existing user
     public async Task<AuthResponseDto> Login(LoginDto loginDto)
     {
-        // find user by email
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
+        // find user by username
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == loginDto.Username);
 
         if (user == null)
         {
-            throw new UnauthorizedAccessException("Invalid email or password.");
+            throw new UnauthorizedAccessException("Invalid username or password.");
         }
 
         // verify password
         if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
         {
-            throw new UnauthorizedAccessException("Invalid email or password.");
+            throw new UnauthorizedAccessException("Invalid username or password.");
         }
 
         // Generate JWT token
