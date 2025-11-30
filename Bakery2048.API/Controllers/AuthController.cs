@@ -4,6 +4,9 @@ using Bakery2048.API.Services;
 
 namespace Bakery2048.API.Controllers;
 
+/// <summary>
+/// Authentication endpoints for user registration and login
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
@@ -15,8 +18,16 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
-    // POST: api/auth/register
+    /// <summary>
+    /// Registers a new user and creates a player profile
+    /// </summary>
+    /// <param name="registerDto">User registration details including username, email, and password</param>
+    /// <returns>JWT token and user information</returns>
+    /// <response code="200">Returns the JWT token and user details</response>
+    /// <response code="400">If validation fails or user already exists</response>
     [HttpPost("register")]
+    [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<AuthResponseDto>> Register(RegisterDto registerDto)
     {
         try
@@ -30,8 +41,16 @@ public class AuthController : ControllerBase
         }
     }
 
-    // POST: api/auth/login
+    /// <summary>
+    /// Authenticates a user and returns a JWT token
+    /// </summary>
+    /// <param name="loginDto">User login credentials (email and password)</param>
+    /// <returns>JWT token and user information</returns>
+    /// <response code="200">Returns the JWT token and user details</response>
+    /// <response code="401">If credentials are invalid</response>
     [HttpPost("login")]
+    [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<AuthResponseDto>> Login(LoginDto loginDto)
     {
         try
