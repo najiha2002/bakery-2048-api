@@ -116,6 +116,27 @@ public class PlayerService
         ValidateUsername(username);
         await ValidatePlayerUniqueness(username, email, id);
 
+        // validate scores
+        if (highestScore < 0)
+        {
+            throw new ArgumentException("Highest score cannot be negative.");
+        }
+
+        if (currentScore < 0)
+        {
+            throw new ArgumentException("Current score cannot be negative.");
+        }
+
+        if (gamesPlayed < 0)
+        {
+            throw new ArgumentException("Games played cannot be negative.");
+        }
+
+        if (highestScore < currentScore)
+        {
+            throw new ArgumentException("Highest score must be greater than or equal to current score.");
+        }
+
         player.Username = username;
         player.Email = email;
         player.HighestScore = highestScore;
