@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Bakery2048.API.Data;
+using Bakery2048.API.Services;
 using DotNetEnv;
 
 // load .env file
@@ -15,6 +16,12 @@ var connectionString = $"Host={Environment.GetEnvironmentVariable("DB_HOST")};" 
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
+
+// register services
+builder.Services.AddScoped<PlayerService>();
+builder.Services.AddScoped<TileService>();
+builder.Services.AddScoped<PowerUpService>();
+builder.Services.AddScoped<GameService>();
 
 // add controllers
 builder.Services.AddControllers();
