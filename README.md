@@ -33,7 +33,7 @@ This API provides:
 
 **1. Clone the repository**
 ```bash
-git clone <repo-url>
+git clone https://github.com/najiha2002/bakery-2048-api.git
 cd bakery-2048-api
 ```
 
@@ -47,6 +47,8 @@ DB_USER=postgres
 DB_PASSWORD=your_password
 JWT_SECRET_KEY=your_jwt_secret_key
 ```
+
+Ask for db password from admin.
 
 Generate a secure JWT secret key:
 ```bash
