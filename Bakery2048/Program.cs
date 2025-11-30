@@ -1,0 +1,91 @@
+﻿using Bakery2048.Utilities;
+using Bakery2048.Services;
+
+class Program
+{
+    static List<Player> players = new List<Player>();
+    static List<Tile> tiles = new List<Tile>();
+    static List<PowerUp> powerUps = new List<PowerUp>();
+
+    static PlayerService playerService = null!;
+    static TileService tileService = null!;
+    static PowerUpService powerUpService = null!;
+    static DataGenerationService dataGenService = null!;
+    static DataAnalysisService dataAnalysisService = null!;
+
+    static void Main(string[] args)
+    {
+        playerService = new PlayerService(players);
+        tileService = new TileService(tiles);
+        powerUpService = new PowerUpService(powerUps);
+        dataGenService = new DataGenerationService(playerService, tileService, powerUpService);
+        dataAnalysisService = new DataAnalysisService(playerService, tileService, powerUpService);
+        bool exit = false;
+
+        while (!exit)
+        {
+            Console.Clear();
+            ConsoleUI.ShowTitle("🍰 Bakery 2048 - Data Management System 🍰");
+            ConsoleUI.MenuOption("1", "Manage Players");
+            ConsoleUI.MenuOption("2", "Manage Tiles");
+            ConsoleUI.MenuOption("3", "Manage Power-Ups");
+            ConsoleUI.MenuOption("4", "Generate Random Data");
+            ConsoleUI.MenuOption("5", "Run Data Analysis (LINQ)");
+            ConsoleUI.MenuOption("6", "Exit");
+            Console.WriteLine();
+            
+            string? input = ConsoleUI.Prompt("Select an option (1-6)", ConsoleColor.Yellow);
+
+            switch (input)
+            {
+                case "1":
+                    ManagePlayers();
+                    break;
+                case "2":
+                    ManageTiles();
+                    break;
+                case "3":
+                    ManagePowerUps();
+                    break;
+                case "4":
+                    GenerateRandomData();
+                    break;
+                case "5":
+                    RunAnalysis();
+                    break;
+                case "6":
+                    exit = true;
+                    ConsoleUI.Success("Exiting application. Goodbye!");
+                    break;
+                default:
+                    ConsoleUI.Error("Invalid option. Please try again.");
+                    break;
+            }
+        }
+    }
+
+    static void ManagePlayers()
+    {
+        playerService.ShowMenu();
+    }
+
+    static void ManageTiles()
+    {
+        tileService.ShowMenu();
+    }
+
+    static void ManagePowerUps()
+    {
+        powerUpService.ShowMenu();
+    }
+
+    static void GenerateRandomData()
+    {
+        dataGenService.GenerateAll();
+    }
+
+    static void RunAnalysis()
+    {
+        dataAnalysisService.ShowAnalysisMenu();
+    }
+}

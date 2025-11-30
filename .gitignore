@@ -1,0 +1,17 @@
+# Build outputs
+bin/
+obj/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+
+# User-specific
+*.user
+
+# Environment variables
+.env
+
+# macOS
+.DS_Store
