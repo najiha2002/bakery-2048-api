@@ -68,41 +68,55 @@ public class PlayersController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<PlayerResponseDto>> CreatePlayer(CreatePlayerDto createPlayerDto)
     {
-        var player = await _playerService.CreatePlayer(createPlayerDto.Username, createPlayerDto.Email);
-
-        var playerDto = new PlayerResponseDto
+        try
         {
-            Id = player.Id,
-            Username = player.Username,
-            Email = player.Email,
-            HighestScore = player.HighestScore,
-            CurrentScore = player.CurrentScore,
-            GamesPlayed = player.GamesPlayed,
-            DateCreated = player.DateCreated
-        };
+            var player = await _playerService.CreatePlayer(createPlayerDto.Username, createPlayerDto.Email);
 
-        return CreatedAtAction(nameof(GetPlayer), new { id = player.Id }, playerDto);
+            var playerDto = new PlayerResponseDto
+            {
+                Id = player.Id,
+                Username = player.Username,
+                Email = player.Email,
+                HighestScore = player.HighestScore,
+                CurrentScore = player.CurrentScore,
+                GamesPlayed = player.GamesPlayed,
+                DateCreated = player.DateCreated
+            };
+
+            return CreatedAtAction(nameof(GetPlayer), new { id = player.Id }, playerDto);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     // PUT: api/players/{id} - updates an existing player
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdatePlayer(Guid id, UpdatePlayerDto updatePlayerDto)
     {
-        var player = await _playerService.UpdatePlayer(
-            id, 
-            updatePlayerDto.Username, 
-            updatePlayerDto.Email, 
-            updatePlayerDto.HighestScore, 
-            updatePlayerDto.CurrentScore, 
-            updatePlayerDto.GamesPlayed
-        );
-        
-        if (player == null)
+        try
         {
-            return NotFound();  
-        }
+            var player = await _playerService.UpdatePlayer(
+                id, 
+                updatePlayerDto.Username, 
+                updatePlayerDto.Email, 
+                updatePlayerDto.HighestScore, 
+                updatePlayerDto.CurrentScore, 
+                updatePlayerDto.GamesPlayed
+            );
+            
+            if (player == null)
+            {
+                return NotFound();  
+            }
 
-        return NoContent();
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     // DELETE: api/players/{id} - deletes a player

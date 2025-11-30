@@ -13,6 +13,41 @@ public class PlayerService
         _context = context;
     }
 
+    private async Task ValidatePlayerUniqueness(string username, string email, Guid? excludePlayerId = null)
+    {
+        // check if an active player with the same username already exists
+        var usernameQuery = _context.Players
+            .Where(p => p.Username == username && p.IsActive);
+        
+        if (excludePlayerId.HasValue)
+        {
+            usernameQuery = usernameQuery.Where(p => p.Id != excludePlayerId.Value);
+        }
+        
+        var existingPlayerByUsername = await usernameQuery.FirstOrDefaultAsync();
+        
+        if (existingPlayerByUsername != null)
+        {
+            throw new InvalidOperationException($"An active player with username '{username}' already exists.");
+        }
+
+        // check if an active player with the same email already exists
+        var emailQuery = _context.Players
+            .Where(p => p.Email == email && p.IsActive);
+        
+        if (excludePlayerId.HasValue)
+        {
+            emailQuery = emailQuery.Where(p => p.Id != excludePlayerId.Value);
+        }
+        
+        var existingPlayerByEmail = await emailQuery.FirstOrDefaultAsync();
+        
+        if (existingPlayerByEmail != null)
+        {
+            throw new InvalidOperationException($"An active player with email '{email}' already exists.");
+        }
+    }
+
     public async Task<List<Player>> GetAllPlayers()
     {
         return await _context.Players.ToListAsync();
@@ -33,6 +68,8 @@ public class PlayerService
 
     public async Task<Player> CreatePlayer(string username, string email)
     {
+        await ValidatePlayerUniqueness(username, email);
+
         var player = new Player(username, email);
         _context.Players.Add(player);
         await _context.SaveChangesAsync();
@@ -46,6 +83,8 @@ public class PlayerService
         {
             return null;
         }
+
+        await ValidatePlayerUniqueness(username, email, id);
 
         player.Username = username;
         player.Email = email;
