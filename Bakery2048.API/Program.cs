@@ -11,6 +11,10 @@ Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure to listen on Railway's PORT environment variable
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5130";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
 // build connection string from environment variables
 var connectionString = $"Host={Environment.GetEnvironmentVariable("DB_HOST")};" +
                       $"Database={Environment.GetEnvironmentVariable("DB_NAME")};" +
@@ -82,11 +86,9 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Enable Swagger in all environments for Railway
+app.UseSwagger();
+app.UseSwaggerUI();
 
 // use CORS policy
 app.UseCors("AllowFrontend");
