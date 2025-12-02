@@ -353,7 +353,7 @@ namespace Bakery2048.API.Migrations
                         new
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000005"),
-                            Color = "#f88973ff",
+                            Color = "#f88973",
                             DateCreated = new DateTime(2025, 11, 30, 14, 8, 38, 612, DateTimeKind.Utc).AddTicks(6270),
                             DateModified = new DateTime(2025, 11, 30, 14, 8, 38, 612, DateTimeKind.Utc).AddTicks(6270),
                             Icon = "🍩",
@@ -365,7 +365,7 @@ namespace Bakery2048.API.Migrations
                         new
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000006"),
-                            Color = "#ed7056ff",
+                            Color = "#ed7056",
                             DateCreated = new DateTime(2025, 11, 30, 14, 8, 38, 612, DateTimeKind.Utc).AddTicks(6280),
                             DateModified = new DateTime(2025, 11, 30, 14, 8, 38, 612, DateTimeKind.Utc).AddTicks(6280),
                             Icon = "🍪",
