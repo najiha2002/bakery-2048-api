@@ -19,4 +19,7 @@ COPY --from=build /app/publish .
 # Expose port (Railway will set PORT env variable)
 EXPOSE 8080
 
-ENTRYPOINT ["dotnet", "Bakery2048.API.dll"]
+# Create entrypoint script
+RUN echo '#!/bin/bash\nset -e\necho "Waiting for database..."\nsleep 5\necho "Database ready"\nexec dotnet Bakery2048.API.dll' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
+
+ENTRYPOINT ["/app/entrypoint.sh"]
