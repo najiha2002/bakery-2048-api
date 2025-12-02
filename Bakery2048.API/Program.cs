@@ -40,6 +40,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+// configure CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.AllowAnyOrigin()          // allow any origin
+              .AllowAnyMethod()           // allow any HTTP method (GET, POST, PUT, DELETE, etc.)
+              .AllowAnyHeader();          // allow any header (Content-Type, Authorization, etc.)
+    });
+});
+
 // register services
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PlayerService>();
@@ -76,6 +87,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// use CORS policy
+app.UseCors("AllowFrontend");
 
 app.UseHttpsRedirection();
 

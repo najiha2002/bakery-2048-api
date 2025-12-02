@@ -1,5 +1,6 @@
 using Bakery2048.API.Data;
 using Bakery2048.API.Models;
+using Bakery2048.API.DTOs;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 
@@ -114,7 +115,7 @@ public class PlayerService
         return player;
     }
 
-    public async Task<Player?> UpdatePlayer(Guid id, string username, string email, int highestScore, int currentScore, int gamesPlayed)
+    public async Task<Player?> UpdatePlayer(Guid id, UpdatePlayerDto updateDto)
     {
         var player = await _context.Players.FindAsync(id);
         if (player == null)
@@ -122,35 +123,75 @@ public class PlayerService
             return null;
         }
 
-        ValidateUsername(username);
-        await ValidatePlayerUniqueness(username, email, id);
-
-        // validate scores
-        if (highestScore < 0)
+        // Update only the fields that are provided (not null)
+        if (updateDto.HighestScore.HasValue)
         {
-            throw new ArgumentException("Highest score cannot be negative.");
+            if (updateDto.HighestScore.Value < 0)
+                throw new ArgumentException("Highest score cannot be negative.");
+            player.HighestScore = updateDto.HighestScore.Value;
         }
 
-        if (currentScore < 0)
+        if (updateDto.CurrentScore.HasValue)
         {
-            throw new ArgumentException("Current score cannot be negative.");
+            if (updateDto.CurrentScore.Value < 0)
+                throw new ArgumentException("Current score cannot be negative.");
+            player.CurrentScore = updateDto.CurrentScore.Value;
         }
 
-        if (gamesPlayed < 0)
+        if (updateDto.BestTileAchieved.HasValue)
         {
-            throw new ArgumentException("Games played cannot be negative.");
+            if (updateDto.BestTileAchieved.Value < 0)
+                throw new ArgumentException("Best tile achieved cannot be negative.");
+            player.BestTileAchieved = updateDto.BestTileAchieved.Value;
         }
 
-        if (highestScore < currentScore)
+        if (updateDto.Level.HasValue)
         {
-            throw new ArgumentException("Highest score must be greater than or equal to current score.");
+            if (updateDto.Level.Value < 0)
+                throw new ArgumentException("Level cannot be negative.");
+            player.Level = updateDto.Level.Value;
         }
 
-        player.Username = username;
-        player.Email = email;
-        player.HighestScore = highestScore;
-        player.CurrentScore = currentScore;
-        player.GamesPlayed = gamesPlayed;
+        if (updateDto.GamesPlayed.HasValue)
+        {
+            if (updateDto.GamesPlayed.Value < 0)
+                throw new ArgumentException("Games played cannot be negative.");
+            player.GamesPlayed = updateDto.GamesPlayed.Value;
+        }
+
+        if (updateDto.AverageScore.HasValue)
+        {
+            if (updateDto.AverageScore.Value < 0)
+                throw new ArgumentException("Average score cannot be negative.");
+            player.AverageScore = updateDto.AverageScore.Value;
+        }
+
+        if (updateDto.TotalPlayTime.HasValue)
+            player.TotalPlayTime = updateDto.TotalPlayTime.Value;
+
+        if (updateDto.WinStreak.HasValue)
+        {
+            if (updateDto.WinStreak.Value < 0)
+                throw new ArgumentException("Win streak cannot be negative.");
+            player.WinStreak = updateDto.WinStreak.Value;
+        }
+
+        if (updateDto.TotalMoves.HasValue)
+        {
+            if (updateDto.TotalMoves.Value < 0)
+                throw new ArgumentException("Total moves cannot be negative.");
+            player.TotalMoves = updateDto.TotalMoves.Value;
+        }
+
+        if (updateDto.PowerUpsUsed.HasValue)
+        {
+            if (updateDto.PowerUpsUsed.Value < 0)
+                throw new ArgumentException("Power-ups used cannot be negative.");
+            player.PowerUpsUsed = updateDto.PowerUpsUsed.Value;
+        }
+
+        if (updateDto.FavoriteItem != null)
+            player.FavoriteItem = updateDto.FavoriteItem;
 
         await _context.SaveChangesAsync();
         return player;

@@ -88,18 +88,18 @@ public class PlayersController : ControllerBase
     }
 
     /// <summary>
-    /// Updates an existing player's information
+    /// Updates an existing player's game statistics
     /// </summary>
     /// <param name="id">The player's unique identifier</param>
-    /// <param name="updatePlayerDto">Updated player information</param>
-    /// <returns>No content</returns>
-    /// <response code="204">Player successfully updated</response>
+    /// <param name="updatePlayerDto">Updated player statistics</param>
+    /// <returns>Updated player information</returns>
+    /// <response code="200">Player successfully updated</response>
     /// <response code="400">If validation fails</response>
     /// <response code="401">If user is not authenticated</response>
     /// <response code="404">If player is not found</response>
     [Authorize]
     [HttpPut("{id}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -107,21 +107,14 @@ public class PlayersController : ControllerBase
     {
         try
         {
-            var player = await _playerService.UpdatePlayer(
-                id, 
-                updatePlayerDto.Username, 
-                updatePlayerDto.Email, 
-                updatePlayerDto.HighestScore, 
-                updatePlayerDto.CurrentScore, 
-                updatePlayerDto.GamesPlayed
-            );
+            var player = await _playerService.UpdatePlayer(id, updatePlayerDto);
             
             if (player == null)
             {
                 return NotFound();  
             }
 
-            return NoContent();
+            return Ok(player);
         }
         catch (ArgumentException ex)
         {
