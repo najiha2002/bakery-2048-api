@@ -77,8 +77,8 @@ public class ApplicationDbContext : DbContext
             new Tile("Egg", 4) { Id = Guid.Parse("10000000-0000-0000-0000-000000000002"), Color = "#f2e8cb", Icon = "🥚" },
             new Tile("Butter", 8) { Id = Guid.Parse("10000000-0000-0000-0000-000000000003"), Color = "#f5b682", Icon = "🧈" },
             new Tile("Sugar", 16) { Id = Guid.Parse("10000000-0000-0000-0000-000000000004"), Color = "#f29446", Icon = "🍬" },
-            new Tile("Donut", 32) { Id = Guid.Parse("10000000-0000-0000-0000-000000000005"), Color = "#f88973ff", Icon = "🍩" },
-            new Tile("Cookie", 64) { Id = Guid.Parse("10000000-0000-0000-0000-000000000006"), Color = "#ed7056ff", Icon = "🍪" },
+            new Tile("Donut", 32) { Id = Guid.Parse("10000000-0000-0000-0000-000000000005"), Color = "#f88973", Icon = "🍩" },
+            new Tile("Cookie", 64) { Id = Guid.Parse("10000000-0000-0000-0000-000000000006"), Color = "#ed7056", Icon = "🍪" },
             new Tile("Cupcake", 128) { Id = Guid.Parse("10000000-0000-0000-0000-000000000007"), Color = "#ede291", Icon = "🧁" },
             new Tile("Slice Cake", 256) { Id = Guid.Parse("10000000-0000-0000-0000-000000000008"), Color = "#fce130", Icon = "🍰" },
             new Tile("Whole Cake", 512) { Id = Guid.Parse("10000000-0000-0000-0000-000000000009"), Color = "#ffdb4a", Icon = "🎂" }
