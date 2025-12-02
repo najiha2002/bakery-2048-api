@@ -41,6 +41,12 @@ public class ApplicationDbContext : DbContext
             entity.HasKey(p => p.Id);
             entity.Property(p => p.Username).IsRequired().HasMaxLength(100);
             entity.Property(p => p.Email).IsRequired().HasMaxLength(255);
+            
+            // Foreign key relationship to User with cascade delete
+            entity.HasOne(p => p.User)
+                .WithMany()
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // Tile configuration
