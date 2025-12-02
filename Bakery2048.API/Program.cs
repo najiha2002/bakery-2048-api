@@ -108,6 +108,15 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+// Run migrations automatically on startup
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    Console.WriteLine("Running database migrations...");
+    dbContext.Database.Migrate();
+    Console.WriteLine("Migrations completed successfully.");
+}
+
 // Enable Swagger in all environments for Railway
 app.UseSwagger();
 app.UseSwaggerUI();
