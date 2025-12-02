@@ -6,26 +6,45 @@ using Bakery2048.API.Data;
 using Bakery2048.API.Services;
 using DotNetEnv;
 
-// load .env file only in development (not on Railway)
-if (File.Exists(".env"))
+try
 {
-    Env.Load();
-}
+    // load .env file only in development (not on Railway)
+    if (File.Exists(".env"))
+    {
+        Env.Load();
+    }
 
-var builder = WebApplication.CreateBuilder(args);
+    var builder = WebApplication.CreateBuilder(args);
 
-// Configure to listen on Railway's PORT environment variable
-var port = Environment.GetEnvironmentVariable("PORT") ?? "5130";
-builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+    // Configure to listen on Railway's PORT environment variable
+    var port = Environment.GetEnvironmentVariable("PORT") ?? "5130";
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
-// build connection string from environment variables
-var connectionString = $"Host={Environment.GetEnvironmentVariable("DB_HOST")};" +
-                      $"Database={Environment.GetEnvironmentVariable("DB_NAME")};" +
-                      $"Username={Environment.GetEnvironmentVariable("DB_USER")};" +
-                      $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")}";
+    // Validate required environment variables
+    var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
+    var dbName = Environment.GetEnvironmentVariable("DB_NAME");
+    var dbUser = Environment.GetEnvironmentVariable("DB_USER");
+    var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
+    var jwtKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    if (string.IsNullOrEmpty(dbHost) || string.IsNullOrEmpty(dbName) || 
+        string.IsNullOrEmpty(dbUser) || string.IsNullOrEmpty(dbPassword))
+    {
+        throw new InvalidOperationException("Database environment variables are not configured. Please set DB_HOST, DB_NAME, DB_USER, and DB_PASSWORD.");
+    }
+
+    if (string.IsNullOrEmpty(jwtKey))
+    {
+        throw new InvalidOperationException("JWT_SECRET_KEY environment variable is not configured.");
+    }
+
+    // build connection string from environment variables
+    var connectionString = $"Host={dbHost};Database={dbName};Username={dbUser};Password={dbPassword}";
+    
+    Console.WriteLine($"Connecting to database at {dbHost}...");
+
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(connectionString));
 
 // configure JWT authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -93,15 +112,23 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// use CORS policy
-app.UseCors("AllowFrontend");
+    // use CORS policy
+    app.UseCors("AllowFrontend");
 
-app.UseHttpsRedirection();
+    app.UseHttpsRedirection();
 
-app.UseAuthentication();
-app.UseAuthorization();
+    app.UseAuthentication();
+    app.UseAuthorization();
 
-// routes http requests to controllers methods
-app.MapControllers();
+    // routes http requests to controllers methods
+    app.MapControllers();
 
-app.Run();
+    Console.WriteLine($"Starting application on port {port}...");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Application failed to start: {ex.Message}");
+    Console.WriteLine($"Stack trace: {ex.StackTrace}");
+    throw;
+}
