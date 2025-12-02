@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["dotnet-sdk_8"]
+
+[phases.build]
+cmds = ["dotnet restore Bakery2048.API/Bakery2048.API.csproj", "dotnet build Bakery2048.API/Bakery2048.API.csproj -c Release"]
+
+[start]
+cmd = "dotnet run --project Bakery2048.API/Bakery2048.API.csproj --no-build -c Release"
