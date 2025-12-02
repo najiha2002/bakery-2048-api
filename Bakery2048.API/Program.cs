@@ -128,12 +128,7 @@ app.UseSwaggerUI();
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"FATAL ERROR: Application failed to start");
-    Console.WriteLine($"Error Type: {ex.GetType().Name}");
-    Console.WriteLine($"Error Message: {ex.Message}");
-    if (ex.InnerException != null)
-    {
-        Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
-    }
-    Environment.Exit(1);
+    Console.WriteLine($"Application failed to start: {ex.Message}");
+    Console.WriteLine($"Stack trace: {ex.StackTrace}");
+    throw;
 }
