@@ -6,8 +6,11 @@ using Bakery2048.API.Data;
 using Bakery2048.API.Services;
 using DotNetEnv;
 
-// load .env file
-Env.Load();
+// load .env file only in development (not on Railway)
+if (File.Exists(".env"))
+{
+    Env.Load();
+}
 
 var builder = WebApplication.CreateBuilder(args);
 
