@@ -17,6 +17,10 @@ public class Player : BaseEntity
     public int PowerUpsUsed { get; set; }
     public List<string> PowerUpHistory { get; set; } = new List<string>(); // Track which power-ups were used
     public string FavoriteItem { get; set; }
+    
+    // Foreign key to User
+    public int UserId { get; set; }
+    public User? User { get; set; }
 
     // Convenience properties that map to base class
     public Guid PlayerId => Id; // Alias for Id
