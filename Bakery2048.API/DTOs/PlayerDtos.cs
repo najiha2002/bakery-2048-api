@@ -45,6 +45,8 @@ public class PlayerResponseDto
     public int CurrentScore { get; set; }
 
     public int GamesPlayed { get; set; }
+    
+    public int WinStreak { get; set; }
 
     public DateTime DateCreated { get; set; }
 }
