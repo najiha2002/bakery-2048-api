@@ -65,7 +65,10 @@ public class AuthService
         // Create corresponding player record only for non-admin users
         if (user.Role != "Admin")
         {
-            var player = new Player(user.Username, user.Email);
+            var player = new Player(user.Username, user.Email)
+            {
+                UserId = user.Id
+            };
             _context.Players.Add(player);
             await _context.SaveChangesAsync();
         }
