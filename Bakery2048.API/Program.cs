@@ -8,15 +8,22 @@ using DotNetEnv;
 
 try
 {
-    // load .env file only in development (not on Railway)
-    if (File.Exists(".env"))
+    // Load .env file from root directory or current directory
+    var rootEnvPath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory())?.FullName ?? "", ".env");
+    var currentEnvPath = ".env";
+    
+    if (File.Exists(rootEnvPath))
     {
-        Env.Load();
+        Env.Load(rootEnvPath);
+    }
+    else if (File.Exists(currentEnvPath))
+    {
+        Env.Load(currentEnvPath);
     }
 
     var builder = WebApplication.CreateBuilder(args);
 
-    // Configure to listen on Railway's PORT environment variable
+    // Configure to listen on specified port (default 5130)
     var port = Environment.GetEnvironmentVariable("PORT") ?? "5130";
     builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
@@ -81,7 +88,6 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PlayerService>();
 builder.Services.AddScoped<TileService>();
-builder.Services.AddScoped<PowerUpService>();
 
 // add controllers
 builder.Services.AddControllers();

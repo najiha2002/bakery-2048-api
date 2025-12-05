@@ -10,22 +10,205 @@ This API provides:
 - **User Authentication**: JWT-based registration and login
 - **Player Management**: Track player statistics and game progress
 - **Tile Management**: Manage bakery item catalog with icons and colors
-- **Power-Up Management**: Control special abilities for gameplay
 - **Role-Based Access**: Admin and Player roles with authorization
 
 ## Tech Stack
 
-- **Framework**: .NET 10.0 / ASP.NET Core
+- **Framework**: .NET 8.0 / ASP.NET Core
 - **Database**: PostgreSQL with Entity Framework Core
 - **Authentication**: JWT Bearer tokens with BCrypt password hashing
 - **API Documentation**: Swagger/OpenAPI with XML comments
 - **Environment Config**: DotNetEnv for secrets management
+- **Containerization**: Docker and Docker Compose
 
-## Getting Started
+---
+
+## Local Development: Step-by-Step Guide
+
+### Option 1: Docker (Recommended for Quick Setup)
+
+**Prerequisites:**
+- [Docker](https://www.docker.com/get-started) and Docker Compose
+- Git
+
+**Steps:**
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/najiha2002/bakery-2048-api.git
+cd bakery-2048-api
+```
+
+2. **Create environment file (optional)**
+```bash
+cp .env.example .env
+# Edit .env if needed, or use defaults
+```
+
+3. **Generate JWT secret key (optional but recommended)**
+```bash
+openssl rand -base64 32
+# Copy the output and add to .env as JWT_SECRET_KEY
+```
+
+4. **Start the application**
+```bash
+# Run in foreground (logs visible, blocks terminal)
+docker-compose up --build
+
+# OR run in background (detached mode, frees terminal)
+docker-compose up -d --build
+```
+
+This will:
+- Start PostgreSQL database on port 5432
+- Build and start the API on port 5130
+- Automatically run migrations and seed data
+- Create persistent data volume for the database
+
+**Useful commands:**
+```bash
+# View logs (if running in background)
+docker-compose logs -f
+
+# Stop containers
+docker-compose down
+
+# Restart containers
+docker-compose restart
+```
+
+5. **Access the API**
+- Swagger UI: [http://localhost:5130/swagger](http://localhost:5130/swagger)
+- API endpoints: [http://localhost:5130/api/*](http://localhost:5130/api/)
+
+> **Tip**: If you ran `docker-compose up` without `-d`, press `Ctrl+C` to stop. For background mode, use `docker-compose down` to stop.
+
+---
+
+### Option 2: Manual Setup (Without Docker)
+
+### 1. Prerequisites
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+- [PostgreSQL](https://www.postgresql.org/download/)
+- Git
+
+### 2. Clone the Repository
+```bash
+git clone https://github.com/najiha2002/bakery-2048-api.git
+cd bakery-2048-api
+```
+
+### 3. Set Up Environment Variables
+Create a `.env` file in the **root directory** with:
+```env
+DB_HOST=localhost
+DB_NAME=bakery2048_db
+DB_USER=postgres
+DB_PASSWORD=your_local_password
+JWT_SECRET_KEY=your_jwt_secret_key
+```
+Generate a JWT secret key:
+```bash
+openssl rand -base64 32
+```
+
+### 4. Create the Database
+```bash
+createdb bakery2048_db
+```
+
+### 5. Run Migrations
+```bash
+cd Bakery2048.API
+dotnet ef database update
+```
+
+This will:
+- Create all tables (Users, Players, Tiles)
+- Seed 9 Tiles (Flour → Whole Cake)
+
+### 6. Run the API
+```bash
+dotnet run
+```
+The API will be running on port 5130.
+
+### 7. Test the API
+- Open **Swagger UI**: [http://localhost:5130/swagger](http://localhost:5130/swagger)
+- Test endpoints directly: [http://localhost:5130/api/tiles](http://localhost:5130/api/tiles)
+- Or use the included `Bakery2048.API/Bakery2048.API.http` file with the REST Client extension
+
+> **Note**: The root URL (http://localhost:5130/) returns 404. Use `/swagger` or `/api/*` endpoints.
+
+### 8. Run frontend
+
+Once your local backend is running (API on http://localhost:5130), you can use the Bakery 2048 frontend:
+
+- Visit [Bakery 2048 Frontend](https://najiha2002.github.io/bakery-2048/)
+- The frontend is a static web app hosted on GitHub Pages. It communicates with your local backend via API calls to `http://localhost:5130`.
+- Make sure your browser allows requests to `localhost:5130` (CORS is enabled by default in the backend).
+- You can register, login, play the game, and view player stats using the web interface.
+- For admin actions (like creating/updating/deleting tiles), login as an admin and use the admin dashboard in the frontend.
+
+**Troubleshooting:**
+- If you see errors about connecting to the API, ensure your backend is running and accessible at `http://localhost:5130`.
+- If you change the backend port, update the frontend configuration (if needed) to match.
+
+### 9. Create an Admin Account (Optional)
+
+By default, role is set as Player. To access admin-only endpoints (create/update/delete tiles, delete players), register an admin user:
+
+```bash
+curl -X POST "http://localhost:5130/api/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "email": "admin@example.com",
+    "password": "Admin123!",
+    "role": "Admin"
+  }'
+```
+
+**Or via Swagger:**
+1. Go to `/swagger`
+2. Expand `POST /api/auth/register`
+3. Click "Try it out"
+4. Use this JSON:
+```json
+{
+  "username": "admin",
+  "email": "admin@example.com",
+  "password": "Admin123!",
+  "role": "Admin"
+}
+```
+5. Click "Execute"
+
+Then login to get your JWT token:
+```bash
+curl -X POST "http://localhost:5130/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "Admin123!"
+  }'
+```
+
+Copy the `token` from the response and use it in the Authorization header:
+```
+Authorization: Bearer <your-token-here>
+```
+
+Unfortunately, token can't be passed in this Swagger version, hence, alternatively, run this command with Authorization token replaced.
+
+---
+
+## Getting Started (Original Instructions)
 
 ### Prerequisites
 
-- .NET 10.0 SDK
+- .NET 8.0 SDK
 - PostgreSQL database
 - Git
 
@@ -39,7 +222,7 @@ cd bakery-2048-api
 
 **2. Set up environment variables**
 
-Create a `.env` file in the `Bakery2048.API` folder:
+Create a `.env` file in the **root directory**:
 ```bash
 DB_HOST=localhost
 DB_NAME=bakery2048
@@ -69,9 +252,8 @@ dotnet ef database update
 ```
 
 This will:
-- Create all tables (Users, Players, Tiles, PowerUps)
+- Create all tables (Users, Players, Tiles)
 - Seed 9 Tiles (Flour → Whole Cake)
-- Seed 4 PowerUps (Score Boost, Time Extension, Undo, Tile Swap)
 
 **5. Run the application**
 ```bash
@@ -135,14 +317,6 @@ Content-Type: application/json
 - `PUT /api/tiles/{id}` - Update tile (Admin only)
 - `DELETE /api/tiles/{id}` - Delete tile (Admin only)
 
-### PowerUps
-
-- `GET /api/powerups` - Get all power-ups
-- `GET /api/powerups/{id}` - Get power-up by ID
-- `POST /api/powerups` - Create power-up (Admin only)
-- `PUT /api/powerups/{id}` - Update power-up (Admin only)
-- `DELETE /api/powerups/{id}` - Delete power-up (Admin only)
-
 ## Seeded Data
 
 ### Tiles (9 items)
@@ -157,12 +331,6 @@ Content-Type: application/json
 | 128 | Cupcake | 🧁 | #ede291 |
 | 256 | Slice Cake | 🍰 | #fce130 |
 | 512 | Whole Cake | 🎂 | #ffdb4a |
-
-### PowerUps (4 types)
-- **Score Boost** (⚡) - Doubles your score for 30 seconds - $100
-- **Time Extension** (⏰) - Adds 60 seconds to the timer - $150
-- **Undo Move** (↩️) - Undo your last move - $50
-- **Tile Swap** (🔄) - Swap two tiles on the board - $200
 
 ## Features
 

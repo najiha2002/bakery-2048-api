@@ -1,5 +1,11 @@
 @Bakery2048_API_HostAddress = http://localhost:5130
 @token = your_token_here
+@playerId = b793f707-7ebe-4e68-bee6-72133b128b24
+@tileId = your_tile_id_here
+
+#######################################
+# AUTH ENDPOINTS
+#######################################
 
 ### Register a new user
 POST {{Bakery2048_API_HostAddress}}/api/auth/register
@@ -16,24 +22,79 @@ POST {{Bakery2048_API_HostAddress}}/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "najiha@gmail.com",
-  "password": "najiha"
+  "username": "testuser",
+  "password": "Password123!"
 }
 
-### Get all players (requires auth)
-GET {{Bakery2048_API_HostAddress}}/api/players
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoidGVzdHVzZXIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiUGxheWVyIiwiZXhwIjoxNzY0NDgzOTA4LCJpc3MiOiJCYWtlcnkyMDQ4QVBJIiwiYXVkIjoiQmFrZXJ5MjA0OENsaWVudCJ9.sXPMWGPUCFFHDenSIlNeGbr7-67YdVw-075YXAfWuWE
+#######################################
+# PLAYER ENDPOINTS
+#######################################
 
-### Get player by ID (requires auth)
-GET {{Bakery2048_API_HostAddress}}/api/players/{id}
+### Get all players
+GET {{Bakery2048_API_HostAddress}}/api/players
 Authorization: Bearer {{token}}
+
+### Get top N players (e.g., top 10)
+GET {{Bakery2048_API_HostAddress}}/api/players?top=10
+Authorization: Bearer {{token}}
+
+### Get player by ID
+GET {{Bakery2048_API_HostAddress}}/api/players/{{playerId}}
+Authorization: Bearer {{token}}
+
+### Update player
+PUT {{Bakery2048_API_HostAddress}}/api/players/{{playerId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "highestScore": 7236,
+  "currentScore": 4800,
+  "bestTileAchieved": 512,
+  "gamesPlayed": 6,
+  "winStreak": 5
+}
+
+### Delete player (Admin only)
+DELETE {{Bakery2048_API_HostAddress}}/api/players/{{playerId}}
+Authorization: Bearer {{token}}
+
+#######################################
+# TILE ENDPOINTS
+#######################################
 
 ### Get all tiles
 GET {{Bakery2048_API_HostAddress}}/api/tiles
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoidGVzdHVzZXIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiUGxheWVyIiwiZXhwIjoxNzY0NDgzOTA4LCJpc3MiOiJCYWtlcnkyMDQ4QVBJIiwiYXVkIjoiQmFrZXJ5MjA0OENsaWVudCJ9.sXPMWGPUCFFHDenSIlNeGbr7-67YdVw-075YXAfWuWE
+Authorization: Bearer {{token}}
 
-### Get all power-ups
-GET {{Bakery2048_API_HostAddress}}/api/powerups
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoidGVzdHVzZXIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiUGxheWVyIiwiZXhwIjoxNzY0NDgzOTA4LCJpc3MiOiJCYWtlcnkyMDQ4QVBJIiwiYXVkIjoiQmFrZXJ5MjA0OENsaWVudCJ9.sXPMWGPUCFFHDenSIlNeGbr7-67YdVw-075YXAfWuWE
+### Get tile by ID
+GET {{Bakery2048_API_HostAddress}}/api/tiles/{{tileId}}
+Authorization: Bearer {{token}}
 
+### Create new tile (Admin only)
+POST {{Bakery2048_API_HostAddress}}/api/tiles
+Authorization: Bearer {{token}}
+Content-Type: application/json
 
+{
+  "itemName": "Croissant",
+  "tileValue": 1024,
+  "color": "#FFD700",
+  "icon": "🥐"
+}
+
+### Update tile (Admin only)
+PUT {{Bakery2048_API_HostAddress}}/api/tiles/{{tileId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "itemName": "Golden Croissant",
+  "tileValue": 1024,
+  "color": "#FFD700",
+  "icon": "🥐"
+}
+
+### Delete tile (Admin only)
+DELETE {{Bakery2048_API_HostAddress}}/api/tiles/{{tileId}}
+Authorization: Bearer {{token}}

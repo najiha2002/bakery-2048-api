@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: bakery2048-postgres
+    environment:
+      POSTGRES_DB: bakery2048_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    container_name: bakery2048-api
+    environment:
+      DB_HOST: postgres
+      DB_NAME: bakery2048_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-your-secret-key-change-me}
+      ASPNETCORE_URLS: http://+:5130
+      ASPNETCORE_ENVIRONMENT: Development
+    ports:
+      - "5130:5130"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

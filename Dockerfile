@@ -16,10 +16,10 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/publish .
 
-# Expose port (Railway will set PORT env variable)
-EXPOSE 8080
+# Expose local development port
+EXPOSE 5130
 
-# Create entrypoint script
-RUN echo '#!/bin/bash\nset -e\necho "Waiting for database..."\nsleep 5\necho "Database ready"\nexec dotnet Bakery2048.API.dll' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
+# Create entrypoint script that waits for database
+RUN echo '#!/bin/bash\nset -e\necho "Waiting for database..."\nsleep 5\necho "Starting application..."\nexec dotnet Bakery2048.API.dll' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
 ENTRYPOINT ["/app/entrypoint.sh"]
