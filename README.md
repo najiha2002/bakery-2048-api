@@ -18,147 +18,128 @@ This API provides:
 - **Database**: PostgreSQL with Entity Framework Core
 - **Authentication**: JWT Bearer tokens with BCrypt password hashing
 - **API Documentation**: Swagger/OpenAPI with XML comments
-- **Environment Config**: DotNetEnv for secrets management
 - **Containerization**: Docker and Docker Compose
 
 ---
 
-## Local Development: Step-by-Step Guide
+## Quick Start
 
-### Option 1: Docker (Recommended for Quick Setup)
-
-**Prerequisites:**
+### Prerequisites
 - [Docker](https://www.docker.com/get-started) and Docker Compose
 - Git
 
-**Steps:**
+### Setup
 
-1. **Clone the repository**
+1. **Clone and navigate to the repository**
 ```bash
 git clone https://github.com/najiha2002/bakery-2048-api.git
 cd bakery-2048-api
 ```
 
-2. **Create environment file (optional)**
+2. **Configure environment (optional)**
 ```bash
 cp .env.example .env
 # Edit .env if needed, or use defaults
 ```
 
-3. **Generate JWT secret key (optional but recommended)**
+3. **Start the application**
 ```bash
-openssl rand -base64 32
-# Copy the output and add to .env as JWT_SECRET_KEY
-```
-
-4. **Start the application**
-```bash
-# Run in foreground (logs visible, blocks terminal)
+# Run in foreground (view logs)
 docker-compose up --build
 
-# OR run in background (detached mode, frees terminal)
+# OR run in background (detached mode)
 docker-compose up -d --build
 ```
 
-This will:
-- Start PostgreSQL database on port 5432
-- Build and start the API on port 5130
-- Automatically run migrations and seed data
-- Create persistent data volume for the database
+This automatically:
+- Starts PostgreSQL on port 5432
+- Builds and starts the API on port 5130
+- Runs migrations and seeds data
+- Creates persistent database volume
 
-**Useful commands:**
+4. **Access the API**
+- Swagger UI: http://localhost:5130/swagger
+- API Base URL: http://localhost:5130/api/
+
+**Useful Docker commands:**
 ```bash
-# View logs (if running in background)
-docker-compose logs -f
-
-# Stop containers
-docker-compose down
-
-# Restart containers
-docker-compose restart
+docker-compose logs -f      # View logs
+docker-compose down         # Stop containers
+docker-compose restart api  # Restart API only
 ```
-
-5. **Access the API**
-- Swagger UI: [http://localhost:5130/swagger](http://localhost:5130/swagger)
-- API endpoints: [http://localhost:5130/api/*](http://localhost:5130/api/)
-
-> **Tip**: If you ran `docker-compose up` without `-d`, press `Ctrl+C` to stop. For background mode, use `docker-compose down` to stop.
 
 ---
 
-### Option 2: Manual Setup (Without Docker)
+## Manual Setup (Without Docker)
 
-### 1. Prerequisites
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+### Prerequisites
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [PostgreSQL](https://www.postgresql.org/download/)
-- Git
 
-### 2. Clone the Repository
+### Steps
+
+1. **Clone repository**
 ```bash
 git clone https://github.com/najiha2002/bakery-2048-api.git
 cd bakery-2048-api
 ```
 
-### 3. Set Up Environment Variables
-Create a `.env` file in the **root directory** with:
+2. **Configure environment**
+
+Create `.env` in the root directory:
 ```env
 DB_HOST=localhost
 DB_NAME=bakery2048_db
 DB_USER=postgres
-DB_PASSWORD=your_local_password
+DB_PASSWORD=your_password
 JWT_SECRET_KEY=your_jwt_secret_key
 ```
-Generate a JWT secret key:
+
+Generate JWT secret:
 ```bash
 openssl rand -base64 32
 ```
 
-### 4. Create the Database
+3. **Create database**
 ```bash
 createdb bakery2048_db
 ```
 
-### 5. Run Migrations
+4. **Run migrations**
 ```bash
 cd Bakery2048.API
 dotnet ef database update
 ```
 
-This will:
-- Create all tables (Users, Players, Tiles)
-- Seed 9 Tiles (Flour → Whole Cake)
-
-### 6. Run the API
+5. **Start the API**
 ```bash
 dotnet run
 ```
-The API will be running on port 5130.
 
-### 7. Test the API
-- Open **Swagger UI**: [http://localhost:5130/swagger](http://localhost:5130/swagger)
-- Test endpoints directly: [http://localhost:5130/api/tiles](http://localhost:5130/api/tiles)
-- Or use the included `Bakery2048.API/Bakery2048.API.http` file with the REST Client extension
+Access at http://localhost:5130/swagger
 
-> **Note**: The root URL (http://localhost:5130/) returns 404. Use `/swagger` or `/api/*` endpoints.
+---
 
-### 8. Run frontend
+## Frontend Integration
 
-Once your local backend is running (API on http://localhost:5130), you can use the Bakery 2048 frontend:
+Once your backend is running, use the Bakery 2048 frontend:
 
-- Visit [Bakery 2048 Frontend](https://najiha2002.github.io/bakery-2048/)
-- The frontend is a static web app hosted on GitHub Pages. It communicates with your local backend via API calls to `http://localhost:5130`.
-- Make sure your browser allows requests to `localhost:5130` (CORS is enabled by default in the backend).
-- You can register, login, play the game, and view player stats using the web interface.
-- For admin actions (like creating/updating/deleting tiles), login as an admin and use the admin dashboard in the frontend.
+- **Frontend URL**: https://najiha2002.github.io/bakery-2048/
+- The frontend communicates with your local backend at `http://localhost:5130`
+- CORS is pre-configured for localhost
+- Register, login, play the game, and view player stats via the web interface
 
 **Troubleshooting:**
-- If you see errors about connecting to the API, ensure your backend is running and accessible at `http://localhost:5130`.
-- If you change the backend port, update the frontend configuration (if needed) to match.
+- Ensure backend is running on port 5130
+- Check browser console for connection errors
 
-### 9. Create an Admin Account (Optional)
+---
 
-By default, role is set as Player. To access admin-only endpoints (create/update/delete tiles, delete players), register an admin user:
+## Admin Account Setup
 
+By default, new users are created with the Player role. For admin access:
+
+**Via cURL:**
 ```bash
 curl -X POST "http://localhost:5130/api/auth/register" \
   -H "Content-Type: application/json" \
@@ -170,11 +151,10 @@ curl -X POST "http://localhost:5130/api/auth/register" \
   }'
 ```
 
-**Or via Swagger:**
-1. Go to `/swagger`
+**Via Swagger:**
+1. Go to http://localhost:5130/swagger
 2. Expand `POST /api/auth/register`
-3. Click "Try it out"
-4. Use this JSON:
+3. Click "Try it out" and use:
 ```json
 {
   "username": "admin",
@@ -183,9 +163,8 @@ curl -X POST "http://localhost:5130/api/auth/register" \
   "role": "Admin"
 }
 ```
-5. Click "Execute"
 
-Then login to get your JWT token:
+**Login to get JWT token:**
 ```bash
 curl -X POST "http://localhost:5130/api/auth/login" \
   -H "Content-Type: application/json" \
@@ -195,131 +174,42 @@ curl -X POST "http://localhost:5130/api/auth/login" \
   }'
 ```
 
-Copy the `token` from the response and use it in the Authorization header:
+Use the returned token in Authorization headers:
 ```
-Authorization: Bearer <your-token-here>
+Authorization: Bearer <your-token>
 ```
-
-Unfortunately, token can't be passed in this Swagger version, hence, alternatively, run this command with Authorization token replaced.
 
 ---
-
-## Getting Started (Original Instructions)
-
-### Prerequisites
-
-- .NET 8.0 SDK
-- PostgreSQL database
-- Git
-
-### Setup Instructions
-
-**1. Clone the repository**
-```bash
-git clone https://github.com/najiha2002/bakery-2048-api.git
-cd bakery-2048-api
-```
-
-**2. Set up environment variables**
-
-Create a `.env` file in the **root directory**:
-```bash
-DB_HOST=localhost
-DB_NAME=bakery2048
-DB_USER=postgres
-DB_PASSWORD=your_password
-JWT_SECRET_KEY=your_jwt_secret_key
-```
-
-Ask for db password from admin.
-
-Generate a secure JWT secret key:
-```bash
-openssl rand -base64 32
-```
-
-**3. Create the database**
-```bash
-createdb bakery2048
-# or via psql:
-psql -U postgres -c "CREATE DATABASE bakery2048;"
-```
-
-**4. Run migrations**
-```bash
-cd Bakery2048.API
-dotnet ef database update
-```
-
-This will:
-- Create all tables (Users, Players, Tiles)
-- Seed 9 Tiles (Flour → Whole Cake)
-
-**5. Run the application**
-```bash
-dotnet run
-```
-
-The API will be available at `http://localhost:5130`
 
 ## API Endpoints
 
 ### Authentication
-
-**Register a new player**
-```http
-POST /api/auth/register
-Content-Type: application/json
-
-{
-  "username": "player1",
-  "email": "player1@example.com",
-  "password": "Password123!"
-}
-```
-
-**Register an admin**
-```http
-POST /api/auth/register
-Content-Type: application/json
-
-{
-  "username": "admin",
-  "email": "admin@example.com",
-  "password": "Admin123!",
-  "role": "Admin"
-}
-```
-
-**Login**
-```http
-POST /api/auth/login
-Content-Type: application/json
-
-{
-  "username": "player1",
-  "password": "Password123!"
-}
-```
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login and get JWT token
 
 ### Players
-
-- `GET /api/players` - Get all players (optional `?top=N` query)
+- `GET /api/players` - Get all players (supports `?top=N` query)
 - `GET /api/players/{id}` - Get player by ID
 - `PUT /api/players/{id}` - Update player (requires authentication)
 - `DELETE /api/players/{id}` - Delete player (Admin only)
 
 ### Tiles
-
 - `GET /api/tiles` - Get all tiles
 - `GET /api/tiles/{id}` - Get tile by ID
 - `POST /api/tiles` - Create tile (Admin only)
 - `PUT /api/tiles/{id}` - Update tile (Admin only)
-- `DELETE /api/tiles/{id}` - Delete tile (Admin only)
+- `DELETE /api/tiles/{id}` - Delete last tile only (Admin only)
+
+**Tile Constraints:**
+- Values must be powers of 2 (2, 4, 8, 16, 32, etc.)
+- Only the last tile in progression can be deleted
+- No duplicate tile values or names allowed
+
+---
 
 ## Seeded Data
 
-### Tiles (9 items)
+### Default Tiles (9 bakery items)
 | Value | Name | Icon | Color |
 |-------|------|------|-------|
 | 2 | Flour | 🌾 | #fcefe6 |
@@ -332,35 +222,21 @@ Content-Type: application/json
 | 256 | Slice Cake | 🍰 | #fce130 |
 | 512 | Whole Cake | 🎂 | #ffdb4a |
 
-## Features
-
-### User & Player System
-- Automatic player creation on registration (for non-admin users)
-- BCrypt password hashing for security
-- JWT tokens with role-based claims
-- Username and email validation
-
-### Admin vs Player Roles
-- **Players**: Can view and update their own profile
-- **Admins**: Full CRUD access to all resources, no player profile created
-
-### Security
-- JWT secret stored in environment variables
-- Password hashing with BCrypt
-- Role-based authorization with `[Authorize(Roles = "Admin")]`
-- Unique indexes on username and email
+---
 
 ## Testing
 
-Use the included `.http` file with the REST Client extension:
+**REST Client (.http file):**
 ```
 Bakery2048.API/Bakery2048.API.http
 ```
 
-Or use Swagger UI:
+**Swagger UI:**
 ```
 http://localhost:5130/swagger
 ```
+
+---
 
 ## Project Structure
 
@@ -375,9 +251,34 @@ Bakery2048.API/
 └── Program.cs          # App configuration
 ```
 
+---
+
+## Security Features
+
+- BCrypt password hashing
+- JWT tokens with role-based claims
+- Role-based authorization (`[Authorize(Roles = "Admin")]`)
+- Environment-based secrets management
+- Unique constraints on username and email
+
+---
+
+## Railway Deployment
+
+The app supports Railway's `DATABASE_URL` environment variable. When deploying to Railway:
+
+1. Add PostgreSQL database to your Railway project
+2. Set environment variables:
+   - `JWT_SECRET_KEY` (required)
+   - `PORT` (optional, Railway sets this automatically)
+3. Railway automatically injects `DATABASE_URL`
+
+The app will prioritize `DATABASE_URL` over individual DB variables.
+
+---
+
 ## Documentation
 
-For detailed API documentation, use:
-- **Swagger UI**: `http://localhost:5130/swagger` (when running the application)
+- **Swagger UI**: http://localhost:5130/swagger
 - **REST Client Examples**: [Bakery2048.API.http](Bakery2048.API/Bakery2048.API.http)
-
+- **API Documentation**: [API.md](API.md)
