@@ -178,26 +178,34 @@ public class TilesController : ControllerBase
     /// </summary>
     /// <param name="id">The tile's unique identifier</param>
     /// <returns>No content</returns>
-    /// <response code="204">If the tile was successfully deleted</response>
+    /// <response code="400">If the tile cannot be deleted (middle tile)</response>
     /// <response code="401">If user is not authenticated</response>
     /// <response code="403">If user is not an Admin</response>
     /// <response code="404">If tile is not found</response>
     [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteTile(Guid id)
     {
-        var result = await _tileService.DeleteTile(id);
-        
-        if (!result)
+        try
         {
-            return NotFound();
-        }
+            var result = await _tileService.DeleteTile(id);
+            
+            if (!result)
+            {
+                return NotFound();
+            }
 
-        // successful deletion, return 204 No Content
-        return NoContent();
+            // successful deletion, return 204 No Content
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }

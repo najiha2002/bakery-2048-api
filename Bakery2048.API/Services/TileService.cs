@@ -98,6 +98,22 @@ public class TileService
             return false;
         }
 
+        // Get all active tiles ordered by value
+        var allTiles = await _context.Tiles
+            .Where(t => t.IsActive)
+            .OrderBy(t => t.TileValue)
+            .ToListAsync();
+
+        // Only allow deleting the last tile in the progression
+        var lastTile = allTiles.LastOrDefault();
+        if (lastTile == null || tile.Id != lastTile.Id)
+        {
+            throw new InvalidOperationException(
+                $"Cannot delete tile '{tile.ItemName}' (value: {tile.TileValue}). " +
+                "You can only delete the last tile in the progression to maintain game flow. " +
+                $"The last tile is '{lastTile?.ItemName}' (value: {lastTile?.TileValue}).");
+        }
+
         _context.Tiles.Remove(tile);
         await _context.SaveChangesAsync();
         return true;
