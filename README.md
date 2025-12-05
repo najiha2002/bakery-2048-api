@@ -19,10 +19,63 @@ This API provides:
 - **Authentication**: JWT Bearer tokens with BCrypt password hashing
 - **API Documentation**: Swagger/OpenAPI with XML comments
 - **Environment Config**: DotNetEnv for secrets management
+- **Containerization**: Docker and Docker Compose
 
 ---
 
 ## Local Development: Step-by-Step Guide
+
+### Option 1: Docker (Recommended for Quick Setup)
+
+**Prerequisites:**
+- [Docker](https://www.docker.com/get-started) and Docker Compose
+- Git
+
+**Steps:**
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/najiha2002/bakery-2048-api.git
+cd bakery-2048-api
+```
+
+2. **Create environment file (optional)**
+```bash
+cp .env.example .env
+# Edit .env if needed, or use defaults
+```
+
+3. **Generate JWT secret key (optional but recommended)**
+```bash
+openssl rand -base64 32
+# Copy the output and add to .env as JWT_SECRET_KEY
+```
+
+4. **Start the application**
+```bash
+docker-compose up --build
+```
+
+This will:
+- Start PostgreSQL database on port 5432
+- Build and start the API on port 5130
+- Automatically run migrations and seed data
+- Create persistent data volume for the database
+
+5. **Access the API**
+- Swagger UI: [http://localhost:5130/swagger](http://localhost:5130/swagger)
+- API endpoints: [http://localhost:5130/api/*](http://localhost:5130/api/)
+
+6. **Stop the application**
+```bash
+docker-compose down
+# To remove volumes as well:
+docker-compose down -v
+```
+
+---
+
+### Option 2: Manual Setup (Without Docker)
 
 ### 1. Prerequisites
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
