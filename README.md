@@ -89,7 +89,7 @@ cd bakery-2048-api
 ```
 
 ### 3. Set Up Environment Variables
-Create a `.env` file in `Bakery2048.API/` with:
+Create a `.env` file in the **root directory** with:
 ```env
 DB_HOST=localhost
 DB_NAME=bakery2048_db
@@ -211,7 +211,7 @@ cd bakery-2048-api
 
 **2. Set up environment variables**
 
-Create a `.env` file in the `Bakery2048.API` folder:
+Create a `.env` file in the **root directory**:
 ```bash
 DB_HOST=localhost
 DB_NAME=bakery2048
