@@ -15,17 +15,77 @@ This API provides:
 
 ## Tech Stack
 
-- **Framework**: .NET 10.0 / ASP.NET Core
+- **Framework**: .NET 8.0 / ASP.NET Core
 - **Database**: PostgreSQL with Entity Framework Core
 - **Authentication**: JWT Bearer tokens with BCrypt password hashing
 - **API Documentation**: Swagger/OpenAPI with XML comments
 - **Environment Config**: DotNetEnv for secrets management
 
-## Getting Started
+---
+
+## Local Development: Step-by-Step Guide
+
+### 1. Prerequisites
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+- [PostgreSQL](https://www.postgresql.org/download/)
+- Git
+
+### 2. Clone the Repository
+```bash
+git clone https://github.com/najiha2002/bakery-2048-api.git
+cd bakery-2048-api
+```
+
+### 3. Set Up Environment Variables
+Create a `.env` file in `Bakery2048.API/` with:
+```env
+DB_HOST=localhost
+DB_NAME=bakery2048_db
+DB_USER=postgres
+DB_PASSWORD=your_local_password
+JWT_SECRET_KEY=your_jwt_secret_key
+```
+Generate a JWT secret key:
+```bash
+openssl rand -base64 32
+```
+
+### 4. Create the Database
+```bash
+createdb bakery2048_db
+```
+
+### 5. Run Migrations
+```bash
+cd Bakery2048.API
+dotnet ef database update
+```
+
+This will:
+- Create all tables (Users, Players, Tiles, PowerUps)
+- Seed 9 Tiles (Flour → Whole Cake)
+- Seed 4 PowerUps (Score Boost, Time Extension, Undo, Tile Swap)
+
+### 6. Run the API
+```bash
+dotnet run
+```
+The API will be running on port 5130.
+
+### 7. Test the API
+- Open **Swagger UI**: [http://localhost:5130/swagger](http://localhost:5130/swagger)
+- Test endpoints directly: [http://localhost:5130/api/tiles](http://localhost:5130/api/tiles)
+- Or use the included `Bakery2048.API/Bakery2048.API.http` file with the REST Client extension
+
+> **Note**: The root URL (http://localhost:5130/) returns 404. Use `/swagger` or `/api/*` endpoints.
+
+---
+
+## Getting Started (Original Instructions)
 
 ### Prerequisites
 
-- .NET 10.0 SDK
+- .NET 8.0 SDK
 - PostgreSQL database
 - Git
 
