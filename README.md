@@ -306,20 +306,6 @@ Bakery2048.API/
 
 ---
 
-## Railway Deployment
-
-The app supports Railway's `DATABASE_URL` environment variable. When deploying to Railway:
-
-1. Add PostgreSQL database to your Railway project
-2. Set environment variables:
-   - `JWT_SECRET_KEY` (required)
-   - `PORT` (optional, Railway sets this automatically)
-3. Railway automatically injects `DATABASE_URL`
-
-The app will prioritize `DATABASE_URL` over individual DB variables.
-
----
-
 ## Documentation
 
 - **Swagger UI**: http://localhost:5130/swagger
