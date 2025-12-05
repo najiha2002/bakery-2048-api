@@ -10,7 +10,6 @@ This API provides:
 - **User Authentication**: JWT-based registration and login
 - **Player Management**: Track player statistics and game progress
 - **Tile Management**: Manage bakery item catalog with icons and colors
-- **Power-Up Management**: Control special abilities for gameplay
 - **Role-Based Access**: Admin and Player roles with authorization
 
 ## Tech Stack
@@ -62,9 +61,8 @@ dotnet ef database update
 ```
 
 This will:
-- Create all tables (Users, Players, Tiles, PowerUps)
+- Create all tables (Users, Players, Tiles)
 - Seed 9 Tiles (Flour → Whole Cake)
-- Seed 4 PowerUps (Score Boost, Time Extension, Undo, Tile Swap)
 
 ### 6. Run the API
 ```bash
@@ -129,9 +127,8 @@ dotnet ef database update
 ```
 
 This will:
-- Create all tables (Users, Players, Tiles, PowerUps)
+- Create all tables (Users, Players, Tiles)
 - Seed 9 Tiles (Flour → Whole Cake)
-- Seed 4 PowerUps (Score Boost, Time Extension, Undo, Tile Swap)
 
 **5. Run the application**
 ```bash
@@ -195,14 +192,6 @@ Content-Type: application/json
 - `PUT /api/tiles/{id}` - Update tile (Admin only)
 - `DELETE /api/tiles/{id}` - Delete tile (Admin only)
 
-### PowerUps
-
-- `GET /api/powerups` - Get all power-ups
-- `GET /api/powerups/{id}` - Get power-up by ID
-- `POST /api/powerups` - Create power-up (Admin only)
-- `PUT /api/powerups/{id}` - Update power-up (Admin only)
-- `DELETE /api/powerups/{id}` - Delete power-up (Admin only)
-
 ## Seeded Data
 
 ### Tiles (9 items)
@@ -217,12 +206,6 @@ Content-Type: application/json
 | 128 | Cupcake | 🧁 | #ede291 |
 | 256 | Slice Cake | 🍰 | #fce130 |
 | 512 | Whole Cake | 🎂 | #ffdb4a |
-
-### PowerUps (4 types)
-- **Score Boost** (⚡) - Doubles your score for 30 seconds - $100
-- **Time Extension** (⏰) - Adds 60 seconds to the timer - $150
-- **Undo Move** (↩️) - Undo your last move - $50
-- **Tile Swap** (🔄) - Swap two tiles on the board - $200
 
 ## Features
 

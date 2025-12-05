@@ -81,7 +81,6 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PlayerService>();
 builder.Services.AddScoped<TileService>();
-builder.Services.AddScoped<PowerUpService>();
 
 // add controllers
 builder.Services.AddControllers();

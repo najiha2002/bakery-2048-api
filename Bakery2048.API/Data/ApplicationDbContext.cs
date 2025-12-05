@@ -12,7 +12,6 @@ public class ApplicationDbContext : DbContext
     // Your existing models from console app
     public DbSet<Player> Players { get; set; }
     public DbSet<Tile> Tiles { get; set; }
-    public DbSet<PowerUp> PowerUps { get; set; }
 
     // New model for authentication
     public DbSet<User> Users { get; set; }
@@ -57,14 +56,6 @@ public class ApplicationDbContext : DbContext
             entity.Property(t => t.Color).IsRequired().HasMaxLength(7);
         });
 
-        // PowerUp configuration
-        modelBuilder.Entity<PowerUp>(entity =>
-        {
-            entity.HasKey(p => p.Id);
-            entity.Property(p => p.PowerUpName).IsRequired().HasMaxLength(100);
-            entity.Property(p => p.IconUrl).HasMaxLength(500);
-        });
-
         // User configuration
         modelBuilder.Entity<User>(entity =>
         {
@@ -88,34 +79,6 @@ public class ApplicationDbContext : DbContext
             new Tile("Cupcake", 128) { Id = Guid.Parse("10000000-0000-0000-0000-000000000007"), Color = "#ede291", Icon = "🧁" },
             new Tile("Slice Cake", 256) { Id = Guid.Parse("10000000-0000-0000-0000-000000000008"), Color = "#fce130", Icon = "🍰" },
             new Tile("Whole Cake", 512) { Id = Guid.Parse("10000000-0000-0000-0000-000000000009"), Color = "#ffdb4a", Icon = "🎂" }
-        );
-
-        // Seed initial PowerUps
-        modelBuilder.Entity<PowerUp>().HasData(
-            new PowerUp("Score Boost", PowerUpType.ScoreBoost, 100) 
-            { 
-                Id = Guid.Parse("20000000-0000-0000-0000-000000000001"),
-                Description = "Doubles your score for 30 seconds",
-                IconUrl = "⚡"
-            },
-            new PowerUp("Time Extension", PowerUpType.TimeExtension, 150) 
-            { 
-                Id = Guid.Parse("20000000-0000-0000-0000-000000000002"),
-                Description = "Adds 60 seconds to the timer",
-                IconUrl = "⏰"
-            },
-            new PowerUp("Undo Move", PowerUpType.Undo, 50) 
-            { 
-                Id = Guid.Parse("20000000-0000-0000-0000-000000000003"),
-                Description = "Undo your last move",
-                IconUrl = "↩️"
-            },
-            new PowerUp("Tile Swap", PowerUpType.SwapTiles, 200) 
-            { 
-                Id = Guid.Parse("20000000-0000-0000-0000-000000000004"),
-                Description = "Swap any two tiles on the board",
-                IconUrl = "🔄"
-            }
         );
     }
 }
