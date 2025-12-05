@@ -84,52 +84,6 @@ docker-compose restart
 
 > **Tip**: If you ran `docker-compose up` without `-d`, press `Ctrl+C` to stop. For background mode, use `docker-compose down` to stop.
 
-6. **Create an Admin Account**
-
-By default, new registrations create Player accounts. To create an admin account with full access:
-
-**Using curl:**
-```bash
-curl -X POST "http://localhost:5130/api/auth/register" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "admin",
-    "email": "admin@example.com",
-    "password": "Admin123!",
-    "role": "Admin"
-  }'
-```
-
-**Using Swagger UI:**
-1. Go to [http://localhost:5130/swagger](http://localhost:5130/swagger)
-2. Expand `POST /api/auth/register`
-3. Click "Try it out"
-4. Use this JSON body:
-   ```json
-   {
-     "username": "admin",
-     "email": "admin@example.com",
-     "password": "Admin123!",
-     "role": "Admin"
-   }
-   ```
-5. Click "Execute"
-
-Then login to get your admin JWT token:
-```bash
-curl -X POST "http://localhost:5130/api/auth/login" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "admin",
-    "password": "Admin123!"
-  }'
-```
-
-Copy the `token` from the response and use it in Swagger's "Authorize" button or in API requests:
-```
-Authorization: Bearer <your-token-here>
-```
-
 ---
 
 ### Option 2: Manual Setup (Without Docker)
