@@ -2,6 +2,27 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Bakery2048.API.DTOs;
 
+// Custom validation attribute to ensure tile value is a power of 2
+public class PowerOfTwoAttribute : ValidationAttribute
+{
+    protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+    {
+        if (value is int tileValue)
+        {
+            // Check if the value is a power of 2
+            // A number is a power of 2 if: value > 0 AND (value & (value - 1)) == 0
+            if (tileValue > 0 && (tileValue & (tileValue - 1)) == 0)
+            {
+                return ValidationResult.Success;
+            }
+            
+            return new ValidationResult("Tile value must be a power of 2 (e.g., 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, etc.)");
+        }
+        
+        return new ValidationResult("Tile value is required");
+    }
+}
+
 // what the client sends when creating a new tile (bakery item)
 public class CreateTileDto
 {
@@ -12,6 +33,7 @@ public class CreateTileDto
     // point value of this tile 
     [Required(ErrorMessage = "Tile value is required")]
     [Range(1, int.MaxValue, ErrorMessage = "Value must be greater than 0")]
+    [PowerOfTwo]
     public int TileValue { get; set; }
 
     // color of the tile in hex format
@@ -34,6 +56,7 @@ public class UpdateTileDto
 
     [Required(ErrorMessage = "Tile value is required")]
     [Range(1, int.MaxValue, ErrorMessage = "Value must be greater than 0")]
+    [PowerOfTwo]
     public int TileValue { get; set; }
 
     [Required(ErrorMessage = "Color is required")]
