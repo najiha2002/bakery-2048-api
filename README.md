@@ -53,7 +53,11 @@ openssl rand -base64 32
 
 4. **Start the application**
 ```bash
+# Run in foreground (logs visible, blocks terminal)
 docker-compose up --build
+
+# OR run in background (detached mode, frees terminal)
+docker-compose up -d --build
 ```
 
 This will:
@@ -62,15 +66,68 @@ This will:
 - Automatically run migrations and seed data
 - Create persistent data volume for the database
 
+**Useful commands:**
+```bash
+# View logs (if running in background)
+docker-compose logs -f
+
+# Stop containers
+docker-compose down
+
+# Restart containers
+docker-compose restart
+```
+
 5. **Access the API**
 - Swagger UI: [http://localhost:5130/swagger](http://localhost:5130/swagger)
 - API endpoints: [http://localhost:5130/api/*](http://localhost:5130/api/)
 
-6. **Stop the application**
+> **Tip**: If you ran `docker-compose up` without `-d`, press `Ctrl+C` to stop. For background mode, use `docker-compose down` to stop.
+
+6. **Create an Admin Account**
+
+By default, new registrations create Player accounts. To create an admin account with full access:
+
+**Using curl:**
 ```bash
-docker-compose down
-# To remove volumes as well:
-docker-compose down -v
+curl -X POST "http://localhost:5130/api/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "email": "admin@example.com",
+    "password": "Admin123!",
+    "role": "Admin"
+  }'
+```
+
+**Using Swagger UI:**
+1. Go to [http://localhost:5130/swagger](http://localhost:5130/swagger)
+2. Expand `POST /api/auth/register`
+3. Click "Try it out"
+4. Use this JSON body:
+   ```json
+   {
+     "username": "admin",
+     "email": "admin@example.com",
+     "password": "Admin123!",
+     "role": "Admin"
+   }
+   ```
+5. Click "Execute"
+
+Then login to get your admin JWT token:
+```bash
+curl -X POST "http://localhost:5130/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "Admin123!"
+  }'
+```
+
+Copy the `token` from the response and use it in Swagger's "Authorize" button or in API requests:
+```
+Authorization: Bearer <your-token-here>
 ```
 
 ---
