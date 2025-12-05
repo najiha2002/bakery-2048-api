@@ -46,5 +46,7 @@ public class PlayerResponseDto
 
     public int GamesPlayed { get; set; }
 
+    public int WinStreak { get; set; }
+
     public DateTime DateCreated { get; set; }
 }

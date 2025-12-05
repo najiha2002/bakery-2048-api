@@ -45,6 +45,7 @@ public class PlayersController : ControllerBase
             HighestScore = p.HighestScore,
             CurrentScore = p.CurrentScore,
             GamesPlayed = p.GamesPlayed,
+            WinStreak = p.WinStreak,
             DateCreated = p.DateCreated
         }).ToList();
         
@@ -81,6 +82,7 @@ public class PlayersController : ControllerBase
             HighestScore = player.HighestScore,
             CurrentScore = player.CurrentScore,
             GamesPlayed = player.GamesPlayed,
+            WinStreak = player.WinStreak,
             DateCreated = player.DateCreated
         };
 
