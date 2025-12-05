@@ -181,6 +181,49 @@ Authorization: Bearer <your-token>
 
 ---
 
+## Testing & Sample Data
+
+### Quick Test with Sample Data
+
+Populate the database with 7 sample players and test all endpoints:
+
+```bash
+./test-api.sh
+```
+
+This script will:
+- Create 7 players with realistic stats (scores, win streaks, games played)
+- Register an admin user
+- Test all CRUD operations
+- Verify WinStreak field is returned in responses
+- Create a new tile (1024 value)
+- Display top 5 players leaderboard
+
+### Reset Database
+
+To clear all data and start fresh:
+
+```bash
+./reset-db.sh
+```
+
+This will:
+- Stop all containers
+- Delete all database volumes
+- Rebuild and restart with a clean database
+- Ready for new test data
+
+**Example workflow:**
+```bash
+# Reset database
+./reset-db.sh
+
+# Populate with sample data
+./test-api.sh
+```
+
+---
+
 ## API Endpoints
 
 ### Authentication
