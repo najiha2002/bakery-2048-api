@@ -77,6 +77,67 @@ The API will be running on port 5130.
 
 > **Note**: The root URL (http://localhost:5130/) returns 404. Use `/swagger` or `/api/*` endpoints.
 
+### 8. Run frontend
+
+Once your local backend is running (API on http://localhost:5130), you can use the Bakery 2048 frontend:
+
+- Visit [Bakery 2048 Frontend](https://najiha2002.github.io/bakery-2048/)
+- The frontend is a static web app hosted on GitHub Pages. It communicates with your local backend via API calls to `http://localhost:5130`.
+- Make sure your browser allows requests to `localhost:5130` (CORS is enabled by default in the backend).
+- You can register, login, play the game, and view player stats using the web interface.
+- For admin actions (like creating/updating/deleting tiles), login as an admin and use the admin dashboard in the frontend.
+
+**Troubleshooting:**
+- If you see errors about connecting to the API, ensure your backend is running and accessible at `http://localhost:5130`.
+- If you change the backend port, update the frontend configuration (if needed) to match.
+
+### 9. Create an Admin Account (Optional)
+
+By default, role is set as Player. To access admin-only endpoints (create/update/delete tiles, delete players), register an admin user:
+
+```bash
+curl -X POST "http://localhost:5130/api/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "email": "admin@example.com",
+    "password": "Admin123!",
+    "role": "Admin"
+  }'
+```
+
+**Or via Swagger:**
+1. Go to `/swagger`
+2. Expand `POST /api/auth/register`
+3. Click "Try it out"
+4. Use this JSON:
+```json
+{
+  "username": "admin",
+  "email": "admin@example.com",
+  "password": "Admin123!",
+  "role": "Admin"
+}
+```
+5. Click "Execute"
+
+Then login to get your JWT token:
+```bash
+curl -X POST "http://localhost:5130/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "Admin123!"
+  }'
+```
+
+Copy the `token` from the response and use it in the Authorization header:
+```
+Authorization: Bearer <your-token-here>
+```
+
+Unfortunately, token can't be passed in this Swagger version, hence, alternatively, run this command with Authorization token replaced.
+
 ---
 
 ## Getting Started (Original Instructions)
